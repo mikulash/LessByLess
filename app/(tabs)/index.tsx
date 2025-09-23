@@ -11,73 +11,32 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 
 import { Text } from '@/components/Themed';
+import { TrackerType } from '@/enums/TrackerType';
+import { TrackerTypeOption, TrackedItem } from '@/types/tracking';
+import {
+  calculateDaysTracked,
+  formatDateForDisplay,
+  formatDateInput,
+  parseDateInput,
+} from '@/utils/date';
 
 const STORAGE_KEY = 'tracked-items';
 
-const TRACKER_TYPES = [
-  { value: 'ColdTurker', label: 'ColdTurker' },
-  { value: 'Slow lowering the dosage', label: 'Slow lowering the dosage' },
-] as const;
-
-type TrackerType = (typeof TRACKER_TYPES)[number]['value'];
-
-type TrackedItem = {
-  id: string;
-  name: string;
-  startedAt: string;
-  type: TrackerType;
-};
-
-const formatDateInput = (date: Date) => date.toISOString().slice(0, 10);
-
-const parseDateInput = (value: string) => {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-
-  return parsed;
-};
-
-const formatDateForDisplay = (value: string) => {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return 'Unknown date';
-  }
-
-  return parsed.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
-
-const calculateDaysTracked = (value: string) => {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-
-  const now = new Date();
-  const diff = now.getTime() - parsed.getTime();
-  if (diff < 0) {
-    return 0;
-  }
-
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
-};
+const TRACKER_TYPES: TrackerTypeOption[] = [
+  { value: TrackerType.ColdTurker, label: 'ColdTurker' },
+  { value: TrackerType.SlowLoweringTheDosage, label: 'Slow lowering the dosage' },
+];
 
 export default function TabOneScreen() {
   const [items, setItems] = useState<TrackedItem[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedItem, setSelectedItem] = useState<TrackedItem | null>(null);
   const [nameInput, setNameInput] = useState('');
   const [dateInput, setDateInput] = useState(formatDateInput(new Date()));
-  const [selectedType, setSelectedType] = useState<TrackerType>('ColdTurker');
+  const [selectedType, setSelectedType] = useState<TrackerType>(TrackerType.ColdTurker);
   const [isLoading, setLoading] = useState(true);
+  const detailDaysTracked = selectedItem ? calculateDaysTracked(selectedItem.startedAt) : null;
 
   useEffect(() => {
     const loadItems = async () => {
@@ -116,19 +75,34 @@ export default function TabOneScreen() {
   const resetForm = () => {
     setNameInput('');
     setDateInput(formatDateInput(new Date()));
-    setSelectedType('ColdTurker');
+    setSelectedType(TrackerType.ColdTurker);
   };
 
   const handleOpenModal = () => {
+    setModalMode('create');
+    setSelectedItem(null);
     resetForm();
     setModalVisible(true);
   };
 
   const handleCloseModal = () => {
     setModalVisible(false);
+    setSelectedItem(null);
   };
 
-  const handleCreateTracker = () => {
+  const handleOpenDetailModal = (item: TrackedItem) => {
+    setModalMode('edit');
+    setSelectedItem(item);
+    setNameInput(item.name);
+    setSelectedType(item.type);
+
+    const parsedDate = parseDateInput(item.startedAt);
+    setDateInput(parsedDate ? formatDateInput(parsedDate) : '');
+
+    setModalVisible(true);
+  };
+
+  const handleSaveTracker = () => {
     const trimmedName = nameInput.trim();
     if (!trimmedName) {
       return;
@@ -136,15 +110,41 @@ export default function TabOneScreen() {
 
     const parsedDate = parseDateInput(dateInput) ?? new Date();
 
-    const newItem: TrackedItem = {
-      id: `${Date.now()}`,
-      name: trimmedName,
-      startedAt: parsedDate.toISOString(),
-      type: selectedType,
-    };
+    if (modalMode === 'create') {
+      const newItem: TrackedItem = {
+        id: `${Date.now()}`,
+        name: trimmedName,
+        startedAt: parsedDate.toISOString(),
+        type: selectedType,
+      };
 
-    setItems((previous) => [...previous, newItem]);
+      setItems((previous) => [...previous, newItem]);
+    } else if (selectedItem) {
+      const updatedItem: TrackedItem = {
+        ...selectedItem,
+        name: trimmedName,
+        startedAt: parsedDate.toISOString(),
+        type: selectedType,
+      };
+
+      setItems((previous) =>
+        previous.map((item) => (item.id === selectedItem.id ? updatedItem : item))
+      );
+      setSelectedItem(updatedItem);
+    }
+
     setModalVisible(false);
+    setSelectedItem(null);
+  };
+
+  const handleDeleteTracker = () => {
+    if (!selectedItem) {
+      return;
+    }
+
+    setItems((previous) => previous.filter((item) => item.id !== selectedItem.id));
+    setModalVisible(false);
+    setSelectedItem(null);
   };
 
   const listEmptyComponent = useMemo(
@@ -184,7 +184,11 @@ export default function TabOneScreen() {
         renderItem={({ item }) => {
           const daysTracked = calculateDaysTracked(item.startedAt);
           return (
-            <View style={styles.card}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={() => handleOpenDetailModal(item)}
+              style={styles.card}
+            >
               <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>{item.name}</Text>
                 <View style={styles.typeBadge}>
@@ -197,7 +201,7 @@ export default function TabOneScreen() {
                   {daysTracked} {daysTracked === 1 ? 'day' : 'days'}
                 </Text>
               ) : null}
-            </View>
+            </TouchableOpacity>
           );
         }}
       />
@@ -210,7 +214,21 @@ export default function TabOneScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create a tracker</Text>
+            <Text style={styles.modalTitle}>
+              {modalMode === 'create' ? 'Create a tracker' : 'Tracker details'}
+            </Text>
+
+            {modalMode === 'edit' && selectedItem ? (
+              <View style={styles.detailSummary}>
+                <Text style={styles.detailSummaryText}>
+                  Started {formatDateForDisplay(selectedItem.startedAt)}
+                </Text>
+                <Text style={[styles.detailSummaryText, styles.detailSummaryTextLast]}>
+                  Tracking for {detailDaysTracked ?? 0}{' '}
+                  {detailDaysTracked === 1 ? 'day' : 'days'}
+                </Text>
+              </View>
+            ) : null}
 
             <Text style={styles.inputLabel}>Name</Text>
             <TextInput
@@ -261,12 +279,25 @@ export default function TabOneScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton, !nameInput.trim() && styles.disabledButton]}
-                onPress={handleCreateTracker}
+                onPress={handleSaveTracker}
                 disabled={!nameInput.trim()}
               >
-                <Text style={[styles.modalButtonText, styles.saveButtonText]}>Save</Text>
+                <Text style={[styles.modalButtonText, styles.saveButtonText]}>
+                  {modalMode === 'create' ? 'Save' : 'Save changes'}
+                </Text>
               </TouchableOpacity>
             </View>
+
+            {modalMode === 'edit' ? (
+              <TouchableOpacity
+                onPress={handleDeleteTracker}
+                style={[styles.modalButton, styles.deleteButton]}
+                accessibilityLabel="Delete tracker"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.modalButtonText, styles.deleteButtonText]}>Delete tracker</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         </View>
       </Modal>
@@ -383,6 +414,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 20,
   },
+  detailSummary: {
+    backgroundColor: '#262635',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+  },
+  detailSummaryText: {
+    color: '#ccc',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  detailSummaryTextLast: {
+    marginBottom: 0,
+  },
   inputLabel: {
     color: '#ccc',
     fontSize: 14,
@@ -447,5 +493,15 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: '#fff',
+  },
+  deleteButton: {
+    backgroundColor: '#d64545',
+    marginLeft: 0,
+    marginTop: 16,
+    alignSelf: 'flex-end',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
 });
