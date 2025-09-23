@@ -1,6 +1,6 @@
 import { Feather, FontAwesome6 } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import {
   FlatList,
   Modal,
@@ -11,74 +11,24 @@ import {
 } from 'react-native';
 
 import { Text } from '@/components/Themed';
+import { TRACKER_TYPES } from '@/constants/trackerTypes';
+import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 import { TrackerType } from '@/enums/TrackerType';
-import { TrackedItem, TrackerTypeOption } from '@/types/tracking';
 import {
   calculateDaysTracked,
   formatDateForDisplay,
   formatDateInput,
   parseDateInput,
 } from '@/utils/date';
+import { getTrackerIcon } from '@/utils/tracker';
 
-const STORAGE_KEY = 'tracked-items';
-
-const TRACKER_TYPES: TrackerTypeOption[] = [
-  { value: TrackerType.ColdTurker, label: 'ColdTurker' },
-  { value: TrackerType.SlowLoweringTheDosage, label: 'Slow lowering the dosage' },
-];
-
-const getTrackerIcon = (type: TrackerType) => {
-  if (type === TrackerType.SlowLoweringTheDosage) {
-    return { name: 'arrow-trend-down' as const, color: '#fb923c' };
-  }
-
-  return { name: 'xmark' as const, color: '#f87171' };
-};
-
-export default function TabOneScreen() {
-  const [items, setItems] = useState<TrackedItem[]>([]);
+export default function HomeScreen() {
+  const { items, addItem } = useTrackedItems();
+  const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-  const [selectedItem, setSelectedItem] = useState<TrackedItem | null>(null);
   const [nameInput, setNameInput] = useState('');
   const [dateInput, setDateInput] = useState(formatDateInput(new Date()));
   const [selectedType, setSelectedType] = useState<TrackerType>(TrackerType.ColdTurker);
-  const [isLoading, setLoading] = useState(true);
-  const detailDaysTracked = selectedItem ? calculateDaysTracked(selectedItem.startedAt) : null;
-
-  useEffect(() => {
-    const loadItems = async () => {
-      try {
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const parsed: TrackedItem[] = JSON.parse(stored);
-          setItems(parsed);
-        }
-      } catch (error) {
-        console.warn('Failed to load tracked items', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadItems();
-  }, []);
-
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-
-    const persist = async () => {
-      try {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      } catch (error) {
-        console.warn('Failed to persist tracked items', error);
-      }
-    };
-
-    void persist();
-  }, [items, isLoading]);
 
   const resetForm = () => {
     setNameInput('');
@@ -87,30 +37,15 @@ export default function TabOneScreen() {
   };
 
   const handleOpenModal = () => {
-    setModalMode('create');
-    setSelectedItem(null);
     resetForm();
     setModalVisible(true);
   };
 
   const handleCloseModal = () => {
     setModalVisible(false);
-    setSelectedItem(null);
   };
 
-  const handleOpenDetailModal = (item: TrackedItem) => {
-    setModalMode('edit');
-    setSelectedItem(item);
-    setNameInput(item.name);
-    setSelectedType(item.type);
-
-    const parsedDate = parseDateInput(item.startedAt);
-    setDateInput(parsedDate ? formatDateInput(parsedDate) : '');
-
-    setModalVisible(true);
-  };
-
-  const handleSaveTracker = () => {
+  const handleCreateTracker = () => {
     const trimmedName = nameInput.trim();
     if (!trimmedName) {
       return;
@@ -118,41 +53,14 @@ export default function TabOneScreen() {
 
     const parsedDate = parseDateInput(dateInput) ?? new Date();
 
-    if (modalMode === 'create') {
-      const newItem: TrackedItem = {
-        id: `${Date.now()}`,
-        name: trimmedName,
-        startedAt: parsedDate.toISOString(),
-        type: selectedType,
-      };
-
-      setItems((previous) => [...previous, newItem]);
-    } else if (selectedItem) {
-      const updatedItem: TrackedItem = {
-        ...selectedItem,
-        name: trimmedName,
-        startedAt: parsedDate.toISOString(),
-        type: selectedType,
-      };
-
-      setItems((previous) =>
-        previous.map((item) => (item.id === selectedItem.id ? updatedItem : item))
-      );
-      setSelectedItem(updatedItem);
-    }
+    addItem({
+      id: `${Date.now()}`,
+      name: trimmedName,
+      startedAt: parsedDate.toISOString(),
+      type: selectedType,
+    });
 
     setModalVisible(false);
-    setSelectedItem(null);
-  };
-
-  const handleDeleteTracker = () => {
-    if (!selectedItem) {
-      return;
-    }
-
-    setItems((previous) => previous.filter((item) => item.id !== selectedItem.id));
-    setModalVisible(false);
-    setSelectedItem(null);
   };
 
   const listEmptyComponent = useMemo(
@@ -194,17 +102,13 @@ export default function TabOneScreen() {
           return (
             <TouchableOpacity
               accessibilityRole="button"
-              onPress={() => handleOpenDetailModal(item)}
+              onPress={() => router.push({ pathname: '/tracker/[id]', params: { id: item.id } })}
               style={styles.card}
             >
               <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>{item.name}</Text>
                 <View style={styles.typeIconContainer} accessible={false}>
-                  <FontAwesome6
-                    color={iconConfig.color}
-                    name={iconConfig.name}
-                    size={18}
-                  />
+                  <FontAwesome6 color={iconConfig.color} name={iconConfig.name} size={18} />
                 </View>
               </View>
               <Text style={styles.cardSubtitle}>Tracking since {formatDateForDisplay(item.startedAt)}</Text>
@@ -226,21 +130,7 @@ export default function TabOneScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {modalMode === 'create' ? 'Create a tracker' : 'Tracker details'}
-            </Text>
-
-            {modalMode === 'edit' && selectedItem ? (
-              <View style={styles.detailSummary}>
-                <Text style={styles.detailSummaryText}>
-                  Started {formatDateForDisplay(selectedItem.startedAt)}
-                </Text>
-                <Text style={[styles.detailSummaryText, styles.detailSummaryTextLast]}>
-                  Tracking for {detailDaysTracked ?? 0}{' '}
-                  {detailDaysTracked === 1 ? 'day' : 'days'}
-                </Text>
-              </View>
-            ) : null}
+            <Text style={styles.modalTitle}>Create a tracker</Text>
 
             <Text style={styles.inputLabel}>Name</Text>
             <TextInput
@@ -291,25 +181,12 @@ export default function TabOneScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton, !nameInput.trim() && styles.disabledButton]}
-                onPress={handleSaveTracker}
+                onPress={handleCreateTracker}
                 disabled={!nameInput.trim()}
               >
-                <Text style={[styles.modalButtonText, styles.saveButtonText]}>
-                  {modalMode === 'create' ? 'Save' : 'Save changes'}
-                </Text>
+                <Text style={[styles.modalButtonText, styles.saveButtonText]}>Save</Text>
               </TouchableOpacity>
             </View>
-
-            {modalMode === 'edit' ? (
-              <TouchableOpacity
-                onPress={handleDeleteTracker}
-                style={[styles.modalButton, styles.deleteButton]}
-                accessibilityLabel="Delete tracker"
-                accessibilityRole="button"
-              >
-                <Text style={[styles.modalButtonText, styles.deleteButtonText]}>Delete tracker</Text>
-              </TouchableOpacity>
-            ) : null}
           </View>
         </View>
       </Modal>
@@ -422,21 +299,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 20,
   },
-  detailSummary: {
-    backgroundColor: '#262635',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginBottom: 16,
-  },
-  detailSummaryText: {
-    color: '#ccc',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  detailSummaryTextLast: {
-    marginBottom: 0,
-  },
   inputLabel: {
     color: '#ccc',
     fontSize: 14,
@@ -501,15 +363,5 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: '#fff',
-  },
-  deleteButton: {
-    backgroundColor: '#d64545',
-    marginLeft: 0,
-    marginTop: 16,
-    alignSelf: 'flex-end',
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontWeight: '600',
   },
 });
