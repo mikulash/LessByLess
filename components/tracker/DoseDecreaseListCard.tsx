@@ -64,8 +64,9 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     backgroundColor: '#2f2f3b',
-    padding: 8,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -85,4 +86,3 @@ const styles = StyleSheet.create({
     color: '#fb923c',
   },
 });
-
