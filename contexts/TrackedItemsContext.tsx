@@ -10,13 +10,13 @@ import React, {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { TRACKED_ITEMS_STORAGE_KEY } from '@/constants/storage';
-import { TrackedItem } from '@/types/tracking';
+import { TrackerItem } from '@/types/tracking';
 
 type TrackedItemsContextValue = {
-  items: TrackedItem[];
+  items: TrackerItem[];
   isLoading: boolean;
-  addItem: (item: TrackedItem) => void;
-  updateItem: (item: TrackedItem) => void;
+  addItem: (item: TrackerItem) => void;
+  updateItem: (item: TrackerItem) => void;
   removeItem: (id: string) => void;
   refresh: () => Promise<void>;
 };
@@ -24,7 +24,7 @@ type TrackedItemsContextValue = {
 const TrackedItemsContext = createContext<TrackedItemsContextValue | undefined>(undefined);
 
 export function TrackedItemsProvider({ children }: PropsWithChildren) {
-  const [items, setItems] = useState<TrackedItem[]>([]);
+  const [items, setItems] = useState<TrackerItem[]>([]);
   const [isLoading, setLoading] = useState(true);
 
   const loadItems = useCallback(async () => {
@@ -32,7 +32,7 @@ export function TrackedItemsProvider({ children }: PropsWithChildren) {
       setLoading(true);
       const stored = await AsyncStorage.getItem(TRACKED_ITEMS_STORAGE_KEY);
       if (stored) {
-        const parsed: TrackedItem[] = JSON.parse(stored);
+        const parsed: TrackerItem[] = JSON.parse(stored);
         setItems(parsed);
       } else {
         setItems([]);
@@ -64,11 +64,11 @@ export function TrackedItemsProvider({ children }: PropsWithChildren) {
     void persist();
   }, [items, isLoading]);
 
-  const addItem = useCallback((item: TrackedItem) => {
+  const addItem = useCallback((item: TrackerItem) => {
     setItems((previous) => [...previous, item]);
   }, []);
 
-  const updateItem = useCallback((item: TrackedItem) => {
+  const updateItem = useCallback((item: TrackerItem) => {
     setItems((previous) => previous.map((existing) => (existing.id === item.id ? item : existing)));
   }, []);
 

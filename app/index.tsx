@@ -1,4 +1,4 @@
-import { Feather, FontAwesome6 } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -11,16 +11,13 @@ import {
 } from 'react-native';
 
 import { Text } from '@/components/Themed';
+import { ColdTurkeyListCard } from '@/components/tracker/ColdTurkeyListCard';
+import { DoseDecreaseListCard } from '@/components/tracker/DoseDecreaseListCard';
 import { TRACKER_TYPES } from '@/constants/trackerTypes';
 import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 import { TrackerType } from '@/enums/TrackerType';
-import {
-  calculateDaysTracked,
-  formatDateForDisplay,
-  formatDateInput,
-  parseDateInput,
-} from '@/utils/date';
-import { getTrackerIcon } from '@/utils/tracker';
+import type { TrackerItem } from '@/types/tracking';
+import { formatDateInput, parseDateInput } from '@/utils/date';
 
 export default function HomeScreen() {
   const { items, addItem } = useTrackedItems();
@@ -53,12 +50,17 @@ export default function HomeScreen() {
 
     const parsedDate = parseDateInput(dateInput) ?? new Date();
 
-    addItem({
+    const baseItem = {
       id: `${Date.now()}`,
       name: trimmedName,
       startedAt: parsedDate.toISOString(),
-      type: selectedType,
-    });
+    };
+
+    if (selectedType === TrackerType.ColdTurker) {
+      addItem({ ...baseItem, type: TrackerType.ColdTurker });
+    } else {
+      addItem({ ...baseItem, type: TrackerType.SlowLoweringTheDosage });
+    }
 
     setModalVisible(false);
   };
@@ -96,29 +98,13 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={listEmptyComponent}
-        renderItem={({ item }) => {
-          const daysTracked = calculateDaysTracked(item.startedAt);
-          const iconConfig = getTrackerIcon(item.type);
-          return (
-            <TouchableOpacity
-              accessibilityRole="button"
-              onPress={() => router.push({ pathname: '/tracker/[id]', params: { id: item.id } })}
-              style={styles.card}
-            >
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>{item.name}</Text>
-                <View style={styles.typeIconContainer} accessible={false}>
-                  <FontAwesome6 color={iconConfig.color} name={iconConfig.name} size={18} />
-                </View>
-              </View>
-              <Text style={styles.cardSubtitle}>Tracking since {formatDateForDisplay(item.startedAt)}</Text>
-              {daysTracked !== null ? (
-                <Text style={styles.cardDuration}>
-                  {daysTracked} {daysTracked === 1 ? 'day' : 'days'}
-                </Text>
-              ) : null}
-            </TouchableOpacity>
-          );
+        renderItem={({ item }: { item: TrackerItem }) => {
+          const handlePress = () => router.push({ pathname: '/tracker/[id]', params: { id: item.id } });
+          if (item.type === TrackerType.ColdTurker) {
+            return <ColdTurkeyListCard item={item} onPress={handlePress} />;
+          }
+
+          return <DoseDecreaseListCard item={item} onPress={handlePress} />;
         }}
       />
 
@@ -227,43 +213,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingVertical: 30,
     paddingBottom: 40,
-  },
-  card: {
-    backgroundColor: '#18181f',
-    padding: 18,
-    borderRadius: 20,
-    marginBottom: 16,
-    width: '100%',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#fff',
-    flexShrink: 1,
-    marginRight: 10,
-  },
-  cardSubtitle: {
-    color: '#bbb',
-    fontSize: 14,
-  },
-  cardDuration: {
-    marginTop: 12,
-    color: '#4c6ef5',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  typeIconContainer: {
-    backgroundColor: '#2f2f3b',
-    padding: 8,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   emptyContainer: {
     width: 260,

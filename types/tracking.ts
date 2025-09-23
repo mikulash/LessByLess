@@ -5,9 +5,19 @@ export type TrackerTypeOption = {
   label: string;
 };
 
-export type TrackedItem = {
+export interface TrackedItem {
   id: string;
   name: string;
   startedAt: string;
   type: TrackerType;
-};
+}
+
+export interface ColdTurkeyTrackedItem extends TrackedItem {
+  type: TrackerType.ColdTurker;
+}
+
+export interface DoseDecreaseTrackedItem extends TrackedItem {
+  type: TrackerType.SlowLoweringTheDosage;
+}
+
+export type TrackerItem = ColdTurkeyTrackedItem | DoseDecreaseTrackedItem;
