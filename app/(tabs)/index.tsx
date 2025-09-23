@@ -1,3 +1,5 @@
+import { Feather, FontAwesome6 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
@@ -7,12 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Feather } from '@expo/vector-icons';
 
 import { Text } from '@/components/Themed';
 import { TrackerType } from '@/enums/TrackerType';
-import { TrackerTypeOption, TrackedItem } from '@/types/tracking';
+import { TrackedItem, TrackerTypeOption } from '@/types/tracking';
 import {
   calculateDaysTracked,
   formatDateForDisplay,
@@ -26,6 +26,14 @@ const TRACKER_TYPES: TrackerTypeOption[] = [
   { value: TrackerType.ColdTurker, label: 'ColdTurker' },
   { value: TrackerType.SlowLoweringTheDosage, label: 'Slow lowering the dosage' },
 ];
+
+const getTrackerIcon = (type: TrackerType) => {
+  if (type === TrackerType.SlowLoweringTheDosage) {
+    return { name: 'arrow-trend-down' as const, color: '#fb923c' };
+  }
+
+  return { name: 'xmark' as const, color: '#f87171' };
+};
 
 export default function TabOneScreen() {
   const [items, setItems] = useState<TrackedItem[]>([]);
@@ -177,12 +185,12 @@ export default function TabOneScreen() {
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={listEmptyComponent}
         renderItem={({ item }) => {
           const daysTracked = calculateDaysTracked(item.startedAt);
+          const iconConfig = getTrackerIcon(item.type);
           return (
             <TouchableOpacity
               accessibilityRole="button"
@@ -191,8 +199,12 @@ export default function TabOneScreen() {
             >
               <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>{item.name}</Text>
-                <View style={styles.typeBadge}>
-                  <Text style={styles.typeBadgeText}>{item.type}</Text>
+                <View style={styles.typeIconContainer} accessible={false}>
+                  <FontAwesome6
+                    color={iconConfig.color}
+                    name={iconConfig.name}
+                    size={18}
+                  />
                 </View>
               </View>
               <Text style={styles.cardSubtitle}>Tracking since {formatDateForDisplay(item.startedAt)}</Text>
@@ -337,14 +349,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: 30,
-    paddingRight: 20,
+    paddingBottom: 40,
   },
   card: {
     backgroundColor: '#18181f',
     padding: 18,
     borderRadius: 20,
-    marginRight: 16,
-    width: 240,
+    marginBottom: 16,
+    width: '100%',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -369,16 +381,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-  typeBadge: {
+  typeIconContainer: {
     backgroundColor: '#2f2f3b',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  typeBadgeText: {
-    color: '#a5b4fc',
-    fontWeight: '600',
-    fontSize: 12,
+    padding: 8,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyContainer: {
     width: 260,
