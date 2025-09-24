@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, View, Text as RNText } from 'react-native
 
 import { Text } from '@/components/Themed';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
-import { formatDateForDisplay } from '@/utils/date';
+import {formatDateForDisplay, formatTimeLeft} from '@/utils/date';
 import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
 import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
 
@@ -13,12 +13,25 @@ type Props = {
     onPress: () => void;
 };
 
+
 export function ColdTurkeyListCard({ item, onPress }: Props) {
     const icon = getTrackerIcon(item.type);
     const progress = getColdTurkeyProgress(item.startedAt);
     const breakdown = useElapsedBreakdown(item.startedAt);
+
+    const startedMs = new Date(item.startedAt).getTime();
+    const elapsedMs = Math.max(0, Date.now() - startedMs);
+
     const progressPercent = progress.next ? progress.progressToNext : 1;
-    const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
+
+    const timeLeft =
+        progress.next && typeof progress.next.durationMs === 'number'
+            ? formatTimeLeft(Math.max(0, progress.next.durationMs - elapsedMs))
+            : null;
+
+    const nextLabel = progress.next
+        ? `Next milestone: ${progress.next.label}${timeLeft ? ` (in ${timeLeft})` : ''}`
+        : 'All milestones achieved';
 
     return (
         <TouchableOpacity accessibilityRole="button" onPress={onPress} style={[styles.card, styles.coldCard]}>
@@ -31,7 +44,7 @@ export function ColdTurkeyListCard({ item, onPress }: Props) {
 
             <Text style={styles.subtitle}>All-in quit since {formatDateForDisplay(item.startedAt)}</Text>
 
-            {/* Breakdown: all white; numbers slightly bolder */}
+            {/* Breakdown: all white; numbers slightly larger & bolder */}
             <RNText style={styles.breakdownText}>
                 {breakdown.map((entry, i) => (
                     <React.Fragment key={`${entry.unit}-${i}`}>
@@ -92,7 +105,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
 
-    // NEW
     breakdownText: {
         marginTop: 12,
         fontWeight: '600',
@@ -100,9 +112,9 @@ const styles = StyleSheet.create({
         color: '#fff', // all white
     },
     breakdownNumber: {
-        fontWeight: '800', // slightly bolder number, still white
+        fontWeight: '800',
+        fontSize: 18, // slightly larger numbers
         color: '#fff',
-        fontSize: 18,
     },
 
     progressContainer: {
