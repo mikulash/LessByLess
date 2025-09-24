@@ -1,12 +1,12 @@
-import { FontAwesome6 } from '@expo/vector-icons';
+import {FontAwesome6} from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Text as RNText } from 'react-native';
+import {StyleSheet, TouchableOpacity, View, Text as RNText} from 'react-native';
 
-import { Text } from '@/components/Themed';
-import { ColdTurkeyTrackedItem } from '@/types/tracking';
+import {Text} from '@/components/Themed';
+import {ColdTurkeyTrackedItem} from '@/types/tracking';
 import {formatDateForDisplay, formatTimeLeft} from '@/utils/date';
-import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
-import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
+import {useElapsedBreakdown} from '@/hooks/useElapsedBreakdown';
+import {getColdTurkeyProgress, getTrackerIcon} from '@/utils/tracker';
 
 type Props = {
     item: ColdTurkeyTrackedItem;
@@ -14,7 +14,7 @@ type Props = {
 };
 
 
-export function ColdTurkeyListCard({ item, onPress }: Props) {
+export function ColdTurkeyListCard({item, onPress}: Props) {
     const icon = getTrackerIcon(item.type);
     const progress = getColdTurkeyProgress(item.startedAt);
     const breakdown = useElapsedBreakdown(item.startedAt);
@@ -25,7 +25,7 @@ export function ColdTurkeyListCard({ item, onPress }: Props) {
     const progressPercent = progress.next ? progress.progressToNext : 1;
 
     const timeLeft =
-        progress.next && typeof progress.next.durationMs === 'number'
+        progress.next
             ? formatTimeLeft(Math.max(0, progress.next.durationMs - elapsedMs))
             : null;
 
@@ -38,7 +38,7 @@ export function ColdTurkeyListCard({ item, onPress }: Props) {
             <View style={styles.header}>
                 <Text style={styles.title}>{item.name}</Text>
                 <View style={[styles.iconContainer, styles.coldIcon]} accessible={false}>
-                    <FontAwesome6 color={icon.color} name={icon.name} size={18} />
+                    <FontAwesome6 color={icon.color} name={icon.name} size={18}/>
                 </View>
             </View>
 
@@ -57,7 +57,7 @@ export function ColdTurkeyListCard({ item, onPress }: Props) {
 
             <View style={styles.progressContainer}>
                 <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: `${Math.round(progressPercent * 100)}%` }]} />
+                    <View style={[styles.progressFill, {width: `${Math.round(progressPercent * 100)}%`}]}/>
                 </View>
                 <Text style={styles.progressLabel}>{nextLabel}</Text>
             </View>
