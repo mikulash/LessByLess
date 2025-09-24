@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   coldSummary: {
     borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.5)',
+    borderColor: 'rgba(52, 211, 153, 0.5)',
   },
   summaryHeader: {
     flexDirection: 'row',
@@ -82,10 +82,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#2f2f3b',
   },
   coldIcon: {
-    backgroundColor: 'rgba(248, 113, 113, 0.15)',
+    backgroundColor: 'rgba(52, 211, 153, 0.15)',
   },
   summarySubtitle: {
-    color: '#fca5a5',
+    color: '#6ee7b7',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -100,6 +100,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   coldHighlight: {
-    color: '#f87171',
+    color: '#34d399',
   },
 });

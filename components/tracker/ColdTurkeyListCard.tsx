@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   coldCard: {
     borderWidth: 1,
-    borderColor: '#f87171',
+    borderColor: '#34d399',
   },
   header: {
     flexDirection: 'row',
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   coldIcon: {
-    backgroundColor: 'rgba(248, 113, 113, 0.15)',
+    backgroundColor: 'rgba(52, 211, 153, 0.15)',
   },
   subtitle: {
     color: '#bbb',
@@ -83,6 +83,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   coldMetaText: {
-    color: '#f87171',
+    color: '#34d399',
   },
 });
