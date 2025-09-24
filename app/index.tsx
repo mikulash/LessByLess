@@ -48,6 +48,7 @@ export default function HomeScreen() {
       id: `${Date.now()}`,
       name: trimmedName,
       startedAt: parsedDate.toISOString(),
+      notifiedMilestones: [],
     };
 
     if (selectedType === TrackerType.ColdTurker) {

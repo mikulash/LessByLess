@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Themed';
 import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
-import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
+import { formatDateForDisplay } from '@/utils/date';
 import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
 
 import { TrackerDetailTemplate } from './TrackerDetailTemplate';
@@ -22,16 +22,17 @@ type ColdTurkeyDetailProps = {
 };
 
 export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
+  const { item } = props;
+  const breakdown = useElapsedBreakdown(item.startedAt);
+  const progress = getColdTurkeyProgress(item.startedAt);
+  const progressPercent = progress.next ? progress.progressToNext : 1;
+  const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
+
   return (
     <TrackerDetailTemplate
       {...props}
       renderSummary={(item) => {
         const icon = getTrackerIcon(item.type);
-        const daysTracked = calculateDaysTracked(item.startedAt);
-        const progress = getColdTurkeyProgress(item.startedAt);
-        const progressPercent = progress.next ? progress.progressToNext : 1;
-        const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
-        const breakdown = useElapsedBreakdown(item.startedAt);
         return (
           <View style={[styles.summaryCard, styles.coldSummary]}>
             <View style={styles.summaryHeader}>
@@ -43,8 +44,11 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
             <Text style={styles.summarySubtitle}>Cold turkey commitment</Text>
             <Text style={styles.summaryMeta}>Since {formatDateForDisplay(item.startedAt)}</Text>
             <View style={styles.breakdownStack}>
-              {breakdown.map((entry) => (
-                <Text key={entry.unit} style={[styles.breakdownRow, styles.coldHighlight]}>
+              {breakdown.map((entry, index) => (
+                <Text
+                  key={`${entry.unit}-${index}`}
+                  style={[styles.breakdownRow, styles.coldHighlight]}
+                >
                   {entry.value} {entry.unit}
                 </Text>
               ))}

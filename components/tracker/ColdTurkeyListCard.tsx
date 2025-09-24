@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { Text } from '@/components/Themed';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
-import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
+import { formatDateForDisplay } from '@/utils/date';
 import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
 import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
 
@@ -14,7 +14,6 @@ type Props = {
 };
 
 export function ColdTurkeyListCard({ item, onPress }: Props) {
-  const daysTracked = calculateDaysTracked(item.startedAt);
   const icon = getTrackerIcon(item.type);
   const progress = getColdTurkeyProgress(item.startedAt);
   const breakdown = useElapsedBreakdown(item.startedAt);

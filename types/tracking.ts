@@ -10,6 +10,7 @@ export interface TrackedItem {
   name: string;
   startedAt: string;
   type: TrackerType;
+  notifiedMilestones?: number[];
 }
 
 export interface ColdTurkeyTrackedItem extends TrackedItem {
