@@ -111,7 +111,7 @@ export default function TrackerDetailScreen() {
   const header = (
     <Stack.Screen
       options={{
-        title: trackedItem.name,
+        title: "DETAIL",
         headerStyle: { backgroundColor: '#0b0b0f' },
         headerTintColor: '#fff',
         headerShadowVisible: false,
