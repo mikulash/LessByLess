@@ -1,11 +1,10 @@
-import  {
+import {
     DateTimePickerAndroid,
     type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
     Modal,
-    Platform,
     StyleSheet,
     TextInput,
     TouchableOpacity,
@@ -17,7 +16,7 @@ import { TRACKER_TYPES } from '@/constants/trackerTypes';
 import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 import { TrackerType } from '@/enums/TrackerType';
 import { formatDateForDisplay } from '@/utils/date';
-import {TrackerItem} from "@/types/tracking";
+import { TrackerItem } from '@/types/tracking';
 
 type CreateTrackerModalProps = {
     visible: boolean;
@@ -27,57 +26,76 @@ type CreateTrackerModalProps = {
 export function CreateTrackerModal({ visible, onClose }: CreateTrackerModalProps) {
     const { addItem } = useTrackedItems();
 
-    // Local state lives here now
     const [name, setName] = useState('');
     const [date, setDate] = useState<Date>(new Date());
     const [selectedType, setSelectedType] = useState<TrackerType>(TrackerType.ColdTurkey);
 
-    // Reset when opened, clean up picker when closed
     useEffect(() => {
         if (visible) {
+            const now = new Date();
             setName('');
-            setDate(new Date());
+            setDate(now);
             setSelectedType(TrackerType.ColdTurkey);
         }
     }, [visible]);
 
     const isSaveDisabled = !name.trim();
-    const formattedDate = useMemo(() => formatDateForDisplay(date.toISOString()), [date]);
 
-    const handleOpenDatePicker = () => {
-        if (Platform.OS === 'android') {
-            DateTimePickerAndroid.open({
-                value: date,
-                mode: 'date',
-                onChange: (event: DateTimePickerEvent, selectedDate?: Date) => {
-                    if (event.type === 'set' && selectedDate) setDate(selectedDate);
-                },
-            });
-            return;
-        }
+    // Formatters
+    const formattedDate = useMemo(
+        () => formatDateForDisplay(date.toISOString()),
+        [date]
+    );
+    const formattedTime = useMemo(() => {
+        const h = String(date.getHours()).padStart(2, '0');
+        const m = String(date.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+    }, [date]);
 
+    const openAndroidDatePicker = () => {
+        DateTimePickerAndroid.open({
+            value: date,
+            mode: 'date',
+            onChange: (event: DateTimePickerEvent, selectedDate?: Date) => {
+                if (event.type !== 'set' || !selectedDate) return;
+                // preserve time from current state
+                const next = new Date(selectedDate);
+                next.setHours(date.getHours(), date.getMinutes(), 0, 0);
+                setDate(next);
+            },
+        });
     };
 
-    const handleIOSDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
-        if (selectedDate) setDate(selectedDate);
+    const openAndroidTimePicker = () => {
+        DateTimePickerAndroid.open({
+            value: date,
+            mode: 'time',
+            onChange: (event: DateTimePickerEvent, selectedTime?: Date) => {
+                if (event.type !== 'set' || !selectedTime) return;
+                // preserve date from current state
+                const next = new Date(date);
+                next.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
+                setDate(next);
+            },
+        });
     };
 
     const handleSave = () => {
         const trimmedName = name.trim();
         if (!trimmedName) return;
 
-        const selectedTrackerType= selectedType === TrackerType.ColdTurkey ? TrackerType.ColdTurkey : TrackerType.SlowLoweringTheDosage;
-
-        const baseItem : TrackerItem = {
+        const baseItem: TrackerItem = {
             id: `${Date.now()}`,
             name: trimmedName,
             startedAt: date.toISOString(),
             notifiedMilestones: [],
-            type: selectedTrackerType,
+            type:
+                selectedType === TrackerType.ColdTurkey
+                    ? TrackerType.ColdTurkey
+                    : TrackerType.SlowLoweringTheDosage,
         };
 
         addItem(baseItem);
-
         onClose();
     };
 
@@ -97,11 +115,14 @@ export function CreateTrackerModal({ visible, onClose }: CreateTrackerModalProps
                     />
 
                     <Text style={styles.inputLabel}>Start date</Text>
-                    <TouchableOpacity style={styles.dateButton} onPress={handleOpenDatePicker}>
-                        <Text style={styles.dateButtonText}>{formattedDate}</Text>
-                    </TouchableOpacity>
-
-
+                    <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+                        <TouchableOpacity style={[styles.dateButton, { flex: 1 }]} onPress={openAndroidDatePicker}>
+                            <Text style={styles.dateButtonText}>{formattedDate}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.dateButton, { width: 110 }]} onPress={openAndroidTimePicker}>
+                            <Text style={styles.dateButtonText}>{formattedTime}</Text>
+                        </TouchableOpacity>
+                    </View>
 
                     <Text style={styles.inputLabel}>Type</Text>
                     <View style={styles.typeSelector}>
@@ -181,11 +202,11 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         paddingHorizontal: 14,
         paddingVertical: 12,
-        marginBottom: 16,
     },
     dateButtonText: {
         color: '#fff',
         fontWeight: '600',
+        textAlign: 'center',
     },
     typeSelector: {
         flexDirection: 'row',
