@@ -19,12 +19,12 @@ export default function HomeScreen() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [dateInput, setDateInput] = useState(formatDateInput(new Date()));
-  const [selectedType, setSelectedType] = useState<TrackerType>(TrackerType.ColdTurker);
+  const [selectedType, setSelectedType] = useState<TrackerType>(TrackerType.ColdTurkey);
 
   const resetForm = () => {
     setNameInput('');
     setDateInput(formatDateInput(new Date()));
-    setSelectedType(TrackerType.ColdTurker);
+    setSelectedType(TrackerType.ColdTurkey);
   };
 
   const handleOpenModal = () => {
@@ -51,8 +51,8 @@ export default function HomeScreen() {
       notifiedMilestones: [],
     };
 
-    if (selectedType === TrackerType.ColdTurker) {
-      addItem({ ...baseItem, type: TrackerType.ColdTurker });
+    if (selectedType === TrackerType.ColdTurkey) {
+      addItem({ ...baseItem, type: TrackerType.ColdTurkey });
     } else {
       addItem({ ...baseItem, type: TrackerType.SlowLoweringTheDosage });
     }
@@ -95,7 +95,7 @@ export default function HomeScreen() {
         ListEmptyComponent={listEmptyComponent}
         renderItem={({ item }: { item: TrackerItem }) => {
           const handlePress = () => router.push({ pathname: '/tracker/[id]', params: { id: item.id } });
-          if (item.type === TrackerType.ColdTurker) {
+          if (item.type === TrackerType.ColdTurkey) {
             return <ColdTurkeyListCard item={item} onPress={handlePress} />;
           }
 

@@ -121,7 +121,7 @@ export default function TrackerDetailScreen() {
 
   const startDateDisplay = formatDateForDisplay(trackedItem.startedAt);
 
-  if (trackedItem.type === TrackerType.ColdTurker) {
+  if (trackedItem.type === TrackerType.ColdTurkey) {
     return (
       <>
         {header}

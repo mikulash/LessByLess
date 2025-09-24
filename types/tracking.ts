@@ -14,7 +14,7 @@ export interface TrackedItem {
 }
 
 export interface ColdTurkeyTrackedItem extends TrackedItem {
-  type: TrackerType.ColdTurker;
+  type: TrackerType.ColdTurkey;
 }
 
 export interface DoseDecreaseTrackedItem extends TrackedItem {

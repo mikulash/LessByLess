@@ -1,4 +1,4 @@
 export enum TrackerType {
-  ColdTurker = 'ColdTurker',
+  ColdTurkey = 'ColdTurkey',
   SlowLoweringTheDosage = 'Slow lowering the dosage',
 }

@@ -39,7 +39,7 @@ export function TrackedItemsProvider({ children }: PropsWithChildren) {
       const stored = await AsyncStorage.getItem(TRACKED_ITEMS_STORAGE_KEY);
       if (stored) {
         const parsed: TrackerItem[] = JSON.parse(stored).map((item: TrackerItem) =>
-          item.type === TrackerType.ColdTurker
+          item.type === TrackerType.ColdTurkey
             ? { ...item, notifiedMilestones: item.notifiedMilestones ?? [] }
             : item
         );
@@ -135,7 +135,7 @@ export function TrackedItemsProvider({ children }: PropsWithChildren) {
     setItems((previous) => {
       let changed = false;
       const updated = previous.map((item) => {
-        if (item.type !== TrackerType.ColdTurker) {
+        if (item.type !== TrackerType.ColdTurkey) {
           return item;
         }
 
