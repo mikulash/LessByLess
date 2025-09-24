@@ -5,5 +5,5 @@ export const getTrackerIcon = (type: TrackerType) => {
     return { name: 'arrow-trend-down' as const, color: '#fb923c' };
   }
 
-  return { name: 'xmark' as const, color: '#f87171' };
+  return { name: 'stop' as const, color: '#f87171' };
 };

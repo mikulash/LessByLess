@@ -7,12 +7,8 @@ import { ColdTurkeyDetail } from '@/components/tracker/details/ColdTurkeyDetail'
 import { DoseDecreaseDetail } from '@/components/tracker/details/DoseDecreaseDetail';
 import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 import { TrackerType } from '@/enums/TrackerType';
-import type {
-  ColdTurkeyTrackedItem,
-  DoseDecreaseTrackedItem,
-  TrackerItem,
-} from '@/types/tracking';
-import { formatDateInput, parseDateInput } from '@/utils/date';
+import type { TrackerItem } from '@/types/tracking';
+import { formatDateForDisplay } from '@/utils/date';
 
 export default function TrackerDetailScreen() {
   const router = useRouter();
@@ -24,8 +20,6 @@ export default function TrackerDetailScreen() {
   );
 
   const [nameInput, setNameInput] = useState('');
-  const [dateInput, setDateInput] = useState(formatDateInput(new Date()));
-  const [selectedType, setSelectedType] = useState<TrackerType>(TrackerType.ColdTurker);
 
   useEffect(() => {
     if (!trackedItem) {
@@ -33,9 +27,6 @@ export default function TrackerDetailScreen() {
     }
 
     setNameInput(trackedItem.name);
-    const parsed = parseDateInput(trackedItem.startedAt);
-    setDateInput(parsed ? formatDateInput(parsed) : '');
-    setSelectedType(trackedItem.type);
   }, [trackedItem]);
 
   const handleSave = () => {
@@ -48,19 +39,37 @@ export default function TrackerDetailScreen() {
       return;
     }
 
-    const parsedDate = parseDateInput(dateInput) ?? new Date();
-    const base = {
+    const updatedItem: TrackerItem = {
       ...trackedItem,
       name: trimmedName,
-      startedAt: parsedDate.toISOString(),
     };
 
-    const updatedItem =
-      selectedType === TrackerType.ColdTurker
-        ? ({ ...base, type: TrackerType.ColdTurker } as ColdTurkeyTrackedItem)
-        : ({ ...base, type: TrackerType.SlowLoweringTheDosage } as DoseDecreaseTrackedItem);
-
     updateItem(updatedItem);
+  };
+
+  const handleResetStartDate = () => {
+    if (!trackedItem) {
+      return;
+    }
+
+    Alert.alert('Reset tracker', 'Reset the start date to today?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Reset',
+        style: 'default',
+        onPress: () => {
+          const today = new Date();
+          const updatedItem: TrackerItem = {
+            ...trackedItem,
+            startedAt: today.toISOString(),
+          };
+          updateItem(updatedItem);
+        },
+      },
+    ]);
   };
 
   const handleDelete = () => {
@@ -99,7 +108,18 @@ export default function TrackerDetailScreen() {
 
   const disableSave = !nameInput.trim();
 
-  const header = <Stack.Screen options={{ title: trackedItem.name }} />;
+  const header = (
+    <Stack.Screen
+      options={{
+        title: trackedItem.name,
+        headerStyle: { backgroundColor: '#0b0b0f' },
+        headerTintColor: '#fff',
+        headerShadowVisible: false,
+      }}
+    />
+  );
+
+  const startDateDisplay = formatDateForDisplay(trackedItem.startedAt);
 
   if (trackedItem.type === TrackerType.ColdTurker) {
     return (
@@ -109,12 +129,10 @@ export default function TrackerDetailScreen() {
           item={trackedItem}
           nameInput={nameInput}
           onNameChange={setNameInput}
-          dateInput={dateInput}
-          onDateChange={setDateInput}
-          selectedType={selectedType}
-          onSelectType={setSelectedType}
+          startDateDisplay={startDateDisplay}
           disableSave={disableSave}
           onSave={handleSave}
+          onResetDate={handleResetStartDate}
           onDelete={handleDelete}
         />
       </>
@@ -128,12 +146,10 @@ export default function TrackerDetailScreen() {
         item={trackedItem}
         nameInput={nameInput}
         onNameChange={setNameInput}
-        dateInput={dateInput}
-        onDateChange={setDateInput}
-        selectedType={selectedType}
-        onSelectType={setSelectedType}
+        startDateDisplay={startDateDisplay}
         disableSave={disableSave}
         onSave={handleSave}
+        onResetDate={handleResetStartDate}
         onDelete={handleDelete}
       />
     </>

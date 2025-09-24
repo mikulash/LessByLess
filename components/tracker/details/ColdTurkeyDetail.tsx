@@ -3,8 +3,6 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/Themed';
-import { TRACKER_TYPES } from '@/constants/trackerTypes';
-import { TrackerType } from '@/enums/TrackerType';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
 import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
 import { getTrackerIcon } from '@/utils/tracker';
@@ -15,12 +13,10 @@ type ColdTurkeyDetailProps = {
   item: ColdTurkeyTrackedItem;
   nameInput: string;
   onNameChange: (value: string) => void;
-  dateInput: string;
-  onDateChange: (value: string) => void;
-  selectedType: TrackerType;
-  onSelectType: (value: TrackerType) => void;
+  startDateDisplay: string;
   disableSave: boolean;
   onSave: () => void;
+  onResetDate: () => void;
   onDelete: () => void;
 };
 
@@ -28,7 +24,6 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
   return (
     <TrackerDetailTemplate
       {...props}
-      typeOptions={TRACKER_TYPES}
       renderSummary={(item) => {
         const icon = getTrackerIcon(item.type);
         const daysTracked = calculateDaysTracked(item.startedAt);
@@ -108,4 +103,3 @@ const styles = StyleSheet.create({
     color: '#f87171',
   },
 });
-

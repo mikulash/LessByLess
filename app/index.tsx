@@ -1,18 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import {
-  FlatList,
-  Modal,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { Text } from '@/components/Themed';
 import { ColdTurkeyListCard } from '@/components/tracker/ColdTurkeyListCard';
 import { DoseDecreaseListCard } from '@/components/tracker/DoseDecreaseListCard';
+import { CreateTrackerModal } from '@/components/tracker/CreateTrackerModal';
 import { TRACKER_TYPES } from '@/constants/trackerTypes';
 import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 import { TrackerType } from '@/enums/TrackerType';
@@ -108,74 +102,17 @@ export default function HomeScreen() {
         }}
       />
 
-      <Modal
-        animationType="slide"
-        transparent
+      <CreateTrackerModal
         visible={isModalVisible}
-        onRequestClose={handleCloseModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create a tracker</Text>
-
-            <Text style={styles.inputLabel}>Name</Text>
-            <TextInput
-              value={nameInput}
-              onChangeText={setNameInput}
-              placeholder="What are you tracking?"
-              placeholderTextColor="#888"
-              style={styles.input}
-            />
-
-            <Text style={styles.inputLabel}>Start date</Text>
-            <TextInput
-              value={dateInput}
-              onChangeText={setDateInput}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#888"
-              style={styles.input}
-              autoCapitalize="none"
-            />
-
-            <Text style={styles.inputLabel}>Type</Text>
-            <View style={styles.typeSelector}>
-              {TRACKER_TYPES.map((type, index) => {
-                const isSelected = selectedType === type.value;
-                return (
-                  <TouchableOpacity
-                    key={type.value}
-                    onPress={() => setSelectedType(type.value)}
-                    style={[
-                      styles.typeOption,
-                      index === TRACKER_TYPES.length - 1 && styles.typeOptionLast,
-                      isSelected && styles.typeOptionSelected,
-                    ]}
-                  >
-                    <Text
-                      style={[styles.typeOptionText, isSelected && styles.typeOptionTextSelected]}
-                    >
-                      {type.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={handleCloseModal}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton, !nameInput.trim() && styles.disabledButton]}
-                onPress={handleCreateTracker}
-                disabled={!nameInput.trim()}
-              >
-                <Text style={[styles.modalButtonText, styles.saveButtonText]}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        name={nameInput}
+        onNameChange={setNameInput}
+        date={dateInput}
+        onDateChange={setDateInput}
+        selectedType={selectedType}
+        onSelectType={setSelectedType}
+        onSave={handleCreateTracker}
+        onCancel={handleCloseModal}
+      />
     </View>
   );
 }
@@ -228,89 +165,5 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     marginTop: 8,
     color: '#ccc',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalContent: {
-    backgroundColor: '#1f1f29',
-    borderRadius: 20,
-    width: '100%',
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 20,
-  },
-  inputLabel: {
-    color: '#ccc',
-    fontSize: 14,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#2a2a35',
-    color: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 16,
-  },
-  typeSelector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  typeOption: {
-    flex: 1,
-    paddingVertical: 12,
-    marginRight: 12,
-    borderRadius: 12,
-    backgroundColor: '#2a2a35',
-    alignItems: 'center',
-  },
-  typeOptionLast: {
-    marginRight: 0,
-  },
-  typeOptionSelected: {
-    backgroundColor: '#4c6ef5',
-  },
-  typeOptionText: {
-    color: '#ccc',
-    fontWeight: '600',
-  },
-  typeOptionTextSelected: {
-    color: '#fff',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  modalButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginLeft: 12,
-  },
-  cancelButton: {
-    backgroundColor: '#2a2a35',
-  },
-  saveButton: {
-    backgroundColor: '#4c6ef5',
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  saveButtonText: {
-    color: '#fff',
   },
 });

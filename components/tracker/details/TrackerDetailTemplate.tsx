@@ -1,28 +1,17 @@
 import React, { ReactNode } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { Text } from '@/components/Themed';
-import { TrackerType } from '@/enums/TrackerType';
-import { TrackerTypeOption } from '@/types/tracking';
 
 type TrackerDetailTemplateProps<ItemType> = {
   item: ItemType;
   nameInput: string;
   onNameChange: (value: string) => void;
-  dateInput: string;
-  onDateChange: (value: string) => void;
-  selectedType: TrackerType;
-  onSelectType: (type: TrackerType) => void;
+  startDateDisplay: string;
   onSave: () => void;
+  onResetDate: () => void;
   onDelete: () => void;
   disableSave: boolean;
-  typeOptions: TrackerTypeOption[];
   renderSummary: (item: ItemType) => ReactNode;
   saveLabel?: string;
 };
@@ -31,14 +20,11 @@ export function TrackerDetailTemplate<ItemType>({
   item,
   nameInput,
   onNameChange,
-  dateInput,
-  onDateChange,
-  selectedType,
-  onSelectType,
+  startDateDisplay,
   onSave,
+  onResetDate,
   onDelete,
   disableSave,
-  typeOptions,
   renderSummary,
   saveLabel = 'Save changes',
 }: TrackerDetailTemplateProps<ItemType>) {
@@ -59,35 +45,8 @@ export function TrackerDetailTemplate<ItemType>({
         />
 
         <Text style={styles.inputLabel}>Start date</Text>
-        <TextInput
-          value={dateInput}
-          onChangeText={onDateChange}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#888"
-          style={styles.input}
-          autoCapitalize="none"
-        />
-
-        <Text style={styles.inputLabel}>Type</Text>
-        <View style={styles.typeSelector}>
-          {typeOptions.map((type, index) => {
-            const isSelected = selectedType === type.value;
-            return (
-              <TouchableOpacity
-                key={type.value}
-                onPress={() => onSelectType(type.value)}
-                style={[
-                  styles.typeOption,
-                  index === typeOptions.length - 1 && styles.typeOptionLast,
-                  isSelected && styles.typeOptionSelected,
-                ]}
-              >
-                <Text style={[styles.typeOptionText, isSelected && styles.typeOptionTextSelected]}>
-                  {type.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+        <View style={styles.readonlyField}>
+          <Text style={styles.readonlyText}>{startDateDisplay}</Text>
         </View>
 
         <View style={styles.sectionActions}>
@@ -98,9 +57,15 @@ export function TrackerDetailTemplate<ItemType>({
           >
             <Text style={styles.primaryButtonText}>{saveLabel}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
-            <Text style={styles.deleteButtonText}>Delete tracker</Text>
-          </TouchableOpacity>
+
+          <View style={styles.secondaryActions}>
+            <TouchableOpacity style={styles.resetButton} onPress={onResetDate}>
+              <Text style={styles.secondaryButtonText}>Reset start date</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
+              <Text style={styles.secondaryButtonText}>Delete tracker</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -118,17 +83,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#18181f',
     borderRadius: 20,
     padding: 20,
+    gap: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#fff',
-    marginBottom: 16,
   },
   inputLabel: {
     color: '#ccc',
     fontSize: 14,
-    marginBottom: 6,
   },
   input: {
     backgroundColor: '#2a2a35',
@@ -136,56 +100,52 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    marginBottom: 16,
   },
-  typeSelector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  typeOption: {
-    flex: 1,
-    paddingVertical: 12,
-    marginRight: 12,
-    borderRadius: 12,
+  readonlyField: {
     backgroundColor: '#2a2a35',
-    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
-  typeOptionLast: {
-    marginRight: 0,
-  },
-  typeOptionSelected: {
-    backgroundColor: '#4c6ef5',
-  },
-  typeOptionText: {
-    color: '#ccc',
+  readonlyText: {
+    color: '#fff',
     fontWeight: '600',
   },
-  typeOptionTextSelected: {
-    color: '#fff',
-  },
   sectionActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 16,
   },
   primaryButton: {
     backgroundColor: '#4c6ef5',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
+    alignItems: 'center',
   },
   primaryButtonText: {
     color: '#fff',
     fontWeight: '600',
+    textAlign: 'center',
+  },
+  secondaryActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  resetButton: {
+    flex: 1,
+    backgroundColor: '#2a2a35',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
   },
   deleteButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    flex: 1,
     backgroundColor: '#d64545',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
   },
-  deleteButtonText: {
+  secondaryButtonText: {
     color: '#fff',
     fontWeight: '600',
   },
