@@ -44,10 +44,6 @@ export function TrackerDetailTemplate<ItemType>({
           style={styles.input}
         />
 
-        <Text style={styles.inputLabel}>Start date</Text>
-        <View style={styles.readonlyField}>
-          <Text style={styles.readonlyText}>{startDateDisplay}</Text>
-        </View>
 
         <View style={styles.sectionActions}>
           <TouchableOpacity
