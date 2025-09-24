@@ -5,7 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '@/components/Themed';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
 import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
-import { getTrackerIcon } from '@/utils/tracker';
+import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
 
 type Props = {
   item: ColdTurkeyTrackedItem;
@@ -15,6 +15,9 @@ type Props = {
 export function ColdTurkeyListCard({ item, onPress }: Props) {
   const daysTracked = calculateDaysTracked(item.startedAt);
   const icon = getTrackerIcon(item.type);
+  const progress = getColdTurkeyProgress(item.startedAt);
+  const progressPercent = progress.next ? progress.progressToNext : 1;
+  const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
 
   return (
     <TouchableOpacity
@@ -34,6 +37,12 @@ export function ColdTurkeyListCard({ item, onPress }: Props) {
           {daysTracked} {daysTracked === 1 ? 'day' : 'days'} strong
         </Text>
       ) : null}
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${Math.round(progressPercent * 100)}%` }]} />
+        </View>
+        <Text style={styles.progressLabel}>{nextLabel}</Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -84,5 +93,24 @@ const styles = StyleSheet.create({
   },
   coldMetaText: {
     color: '#34d399',
+  },
+  progressContainer: {
+    marginTop: 16,
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(52, 211, 153, 0.2)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#34d399',
+  },
+  progressLabel: {
+    marginTop: 8,
+    color: '#a7f3d0',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
