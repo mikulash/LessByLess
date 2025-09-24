@@ -61,26 +61,32 @@ export type ElapsedBreakdownEntry = {
   unit: string;
 };
 
-export const getElapsedBreakdown = (elapsedMs: number, parts: number = 3): ElapsedBreakdownEntry[] => {
-  const result: ElapsedBreakdownEntry[] = [];
-  let remainder = elapsedMs;
+export const getElapsedBreakdown = (
+    elapsedMs: number,
+    parts: number = 3
+): ElapsedBreakdownEntry[] => {
+    const result: ElapsedBreakdownEntry[] = [];
+    let remainder = Math.max(0, elapsedMs);
 
-  for (const unit of TIME_UNITS) {
-    if (result.length >= parts) {
-      break;
+    for (const unit of TIME_UNITS) {
+        if (result.length >= parts) break;
+
+        const count = Math.floor(remainder / unit.durationMs);
+        if (count > 0) {
+            result.push({
+                value: count,
+                unit: count === 1 ? unit.label : `${unit.label}s`,
+            });
+            remainder -= count * unit.durationMs;
+        }
     }
 
-    const unitCount = Math.floor(remainder / unit.durationMs);
-    if (unitCount > 0 || (result.length === 0 && unit.label === 'second')) {
-      result.push({ value: unitCount, unit: unitCount === 1 ? unit.label : `${unit.label}s` });
-      remainder -= unitCount * unit.durationMs;
+    // If everything was < 1s, show a single "0 seconds" so UI isn't empty
+    if (result.length === 0) {
+        const sec = TIME_UNITS[TIME_UNITS.length - 1]; // seconds
+        const count = Math.floor(remainder / sec.durationMs); // 0 for <1s
+        result.push({ value: count, unit: 'seconds' });
     }
-  }
 
-  while (result.length < parts) {
-    const unit = TIME_UNITS[TIME_UNITS.length - 1];
-    result.push({ value: 0, unit: `${unit.label}s` });
-  }
-
-  return result;
+    return result;
 };
