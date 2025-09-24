@@ -1,4 +1,4 @@
-import {
+﻿import {
     DateTimePickerAndroid,
     type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
@@ -16,7 +16,7 @@ import { TRACKER_TYPES } from '@/constants/trackerTypes';
 import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 import { TrackerType } from '@/enums/TrackerType';
 import { formatDateForDisplay } from '@/utils/date';
-import { TrackerItem } from '@/types/tracking';
+import { TrackerItem, DoseDecreaseTrackedItem, DosageUnit } from '@/types/tracking';
 
 type CreateTrackerModalProps = {
     visible: boolean;
@@ -29,6 +29,8 @@ export function CreateTrackerModal({ visible, onClose }: CreateTrackerModalProps
     const [name, setName] = useState('');
     const [date, setDate] = useState<Date>(new Date());
     const [selectedType, setSelectedType] = useState<TrackerType>(TrackerType.ColdTurkey);
+    const [dosageValue, setDosageValue] = useState<string>('');
+    const [dosageUnit, setDosageUnit] = useState<DosageUnit>('mg');
 
     useEffect(() => {
         if (visible) {
@@ -36,10 +38,14 @@ export function CreateTrackerModal({ visible, onClose }: CreateTrackerModalProps
             setName('');
             setDate(now);
             setSelectedType(TrackerType.ColdTurkey);
+            setDosageValue('');
+            setDosageUnit('g');
         }
     }, [visible]);
 
-    const isSaveDisabled = !name.trim();
+    const isDosage = selectedType === TrackerType.SlowLoweringTheDosage;
+    const isAmountValid = !isDosage || (dosageValue.trim().length > 0 && !Number.isNaN(Number(dosageValue)));
+    const isSaveDisabled = !name.trim() || !isAmountValid;
 
     // Formatters
     const formattedDate = useMemo(
@@ -84,18 +90,28 @@ export function CreateTrackerModal({ visible, onClose }: CreateTrackerModalProps
         const trimmedName = name.trim();
         if (!trimmedName) return;
 
-        const baseItem: TrackerItem = {
-            id: `${Date.now()}`,
-            name: trimmedName,
-            startedAt: date.toISOString(),
-            notifiedMilestones: [],
-            type:
-                selectedType === TrackerType.ColdTurkey
-                    ? TrackerType.ColdTurkey
-                    : TrackerType.SlowLoweringTheDosage,
-        };
-
-        addItem(baseItem);
+        if (selectedType === TrackerType.SlowLoweringTheDosage) {
+            const amount = parseFloat(dosageValue);
+            const item: DoseDecreaseTrackedItem = {
+                id: `${Date.now()}`,
+                name: trimmedName,
+                startedAt: date.toISOString(),
+                notifiedMilestones: [],
+                type: TrackerType.SlowLoweringTheDosage,
+                currentUsageValue: Number.isFinite(amount) ? amount : 0,
+                currentUsageUnit: dosageUnit,
+            };
+            addItem(item);
+        } else {
+            const item: TrackerItem = {
+                id: `${Date.now()}`,
+                name: trimmedName,
+                startedAt: date.toISOString(),
+                notifiedMilestones: [],
+                type: TrackerType.ColdTurkey,
+            };
+            addItem(item);
+        }
         onClose();
     };
 
@@ -145,6 +161,37 @@ export function CreateTrackerModal({ visible, onClose }: CreateTrackerModalProps
                             );
                         })}
                     </View>
+
+                                        {selectedType === TrackerType.SlowLoweringTheDosage ? (
+                        <>
+                            <Text style={styles.inputLabel}>Current regular usage</Text>
+                            <View style={styles.usageRow}>
+                                <TextInput
+                                    value={dosageValue}
+                                    onChangeText={setDosageValue}
+                                    placeholder="Amount"
+                                    placeholderTextColor="#888"
+                                    style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                                    keyboardType="decimal-pad"
+                                    inputMode="decimal"
+                                />
+                                <View style={styles.unitSelector}>
+                                    <TouchableOpacity
+                                        style={[styles.unitOption, dosageUnit === 'mg' && styles.unitOptionSelected]}
+                                        onPress={() => setDosageUnit('mg')}
+                                    >
+                                        <Text style={[styles.unitOptionText, dosageUnit === 'mg' && styles.unitOptionTextSelected]}>mg</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.unitOption, dosageUnit === 'g' && styles.unitOptionSelected]}
+                                        onPress={() => setDosageUnit('g')}
+                                    >
+                                        <Text style={[styles.unitOptionText, dosageUnit === 'g' && styles.unitOptionTextSelected]}>g</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </>
+                    ) : null}
 
                     <View style={styles.modalActions}>
                         <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={onClose}>
@@ -234,6 +281,34 @@ const styles = StyleSheet.create({
     typeOptionTextSelected: {
         color: '#fff',
     },
+    usageRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 16,
+    },
+    unitSelector: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    unitOption: {
+        backgroundColor: '#2a2a35',
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    unitOptionSelected: {
+        backgroundColor: '#4c6ef5',
+    },
+    unitOptionText: {
+        color: '#ccc',
+        fontWeight: '600',
+    },
+    unitOptionTextSelected: {
+        color: '#fff',
+    },
     modalActions: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -261,3 +336,4 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
 });
+
