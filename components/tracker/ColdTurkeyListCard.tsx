@@ -5,6 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '@/components/Themed';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
 import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
+import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
 import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
 
 type Props = {
@@ -16,6 +17,7 @@ export function ColdTurkeyListCard({ item, onPress }: Props) {
   const daysTracked = calculateDaysTracked(item.startedAt);
   const icon = getTrackerIcon(item.type);
   const progress = getColdTurkeyProgress(item.startedAt);
+  const breakdown = useElapsedBreakdown(item.startedAt);
   const progressPercent = progress.next ? progress.progressToNext : 1;
   const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
 
@@ -32,11 +34,9 @@ export function ColdTurkeyListCard({ item, onPress }: Props) {
         </View>
       </View>
       <Text style={styles.subtitle}>All-in quit since {formatDateForDisplay(item.startedAt)}</Text>
-      {daysTracked !== null ? (
-        <Text style={[styles.metaText, styles.coldMetaText]}>
-          {daysTracked} {daysTracked === 1 ? 'day' : 'days'} strong
-        </Text>
-      ) : null}
+      <Text style={[styles.metaText, styles.coldMetaText]}>
+        {breakdown.map((entry) => `${entry.value} ${entry.unit}`).join(' • ')}
+      </Text>
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
           <View style={[styles.progressFill, { width: `${Math.round(progressPercent * 100)}%` }]} />

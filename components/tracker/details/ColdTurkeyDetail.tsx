@@ -3,6 +3,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/Themed';
+import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
 import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
 import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
@@ -30,6 +31,7 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
         const progress = getColdTurkeyProgress(item.startedAt);
         const progressPercent = progress.next ? progress.progressToNext : 1;
         const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
+        const breakdown = useElapsedBreakdown(item.startedAt);
         return (
           <View style={[styles.summaryCard, styles.coldSummary]}>
             <View style={styles.summaryHeader}>
@@ -40,11 +42,13 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
             </View>
             <Text style={styles.summarySubtitle}>Cold turkey commitment</Text>
             <Text style={styles.summaryMeta}>Since {formatDateForDisplay(item.startedAt)}</Text>
-            {daysTracked !== null ? (
-              <Text style={[styles.summaryHighlight, styles.coldHighlight]}>
-                {daysTracked} {daysTracked === 1 ? 'day' : 'days'} completely clean
-              </Text>
-            ) : null}
+            <View style={styles.breakdownStack}>
+              {breakdown.map((entry) => (
+                <Text key={entry.unit} style={[styles.breakdownRow, styles.coldHighlight]}>
+                  {entry.value} {entry.unit}
+                </Text>
+              ))}
+            </View>
             <View style={styles.progressContainer}>
               <View style={styles.progressBar}>
                 <View style={[styles.progressFill, { width: `${Math.round(progressPercent * 100)}%` }]} />
@@ -126,6 +130,14 @@ const styles = StyleSheet.create({
   },
   coldHighlight: {
     color: '#34d399',
+  },
+  breakdownStack: {
+    marginTop: 12,
+    gap: 4,
+  },
+  breakdownRow: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   progressContainer: {
     marginTop: 16,
