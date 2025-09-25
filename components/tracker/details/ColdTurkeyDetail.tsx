@@ -26,7 +26,6 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
   const breakdown = useElapsedBreakdown(item.startedAt);
   const progress = getColdTurkeyProgress(item.startedAt);
   const progressPercent = progress.next ? progress.progressToNext : 1;
-  const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
 
   // Milestone colors now come from constants/coldTurkeyMilestones.ts
 
@@ -44,7 +43,6 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
               </View>
             </View>
             <Text style={styles.summarySubtitle}>Cold turkey commitment</Text>
-            {/*<Text style={styles.summaryMeta}>Since {formatDateForDisplay(item.startedAt)}</Text>*/}
             <View style={styles.breakdownStack}>
               {breakdown.map((entry, index) => (
                 <Text
