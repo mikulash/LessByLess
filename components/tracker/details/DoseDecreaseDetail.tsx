@@ -235,11 +235,18 @@ export function DoseDecreaseDetail(props: DoseDecreaseDetailProps) {
                         style={styles.timelineItem}
                         onPress={() => promptLogActions(log.at, log.value)}
                         accessibilityRole="button"
-                        accessibilityLabel={`Dose at ${time}. Tap to edit or delete.`}
+                        accessibilityLabel={`Dose at ${time}${log.note ? `. Note: ${log.note}` : ''}. Tap to edit or delete.`}
                       >
                         <View style={styles.timelineDot} />
-                        <Text style={styles.timelineText}>{time}</Text>
-                        <Text style={styles.timelineValue}>{val} {item.currentUsageUnit}</Text>
+                        <View style={styles.timelineContent}>
+                          <View style={styles.timelineInfoRow}>
+                            <Text style={styles.timelineText}>{time}</Text>
+                            <Text style={styles.timelineValue}>{val} {item.currentUsageUnit}</Text>
+                          </View>
+                          {log.note ? (
+                            <Text style={styles.timelineNote}>{log.note}</Text>
+                          ) : null}
+                        </View>
                       </TouchableOpacity>
                     );
                   })}
@@ -403,7 +410,7 @@ const styles = StyleSheet.create({
   },
   timelineItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 10,
   },
   timelineDot: {
@@ -411,6 +418,13 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#fb923c',
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   timelineText: {
     color: '#fff',
@@ -420,6 +434,11 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     color: '#fb923c',
     fontWeight: '700',
+  },
+  timelineNote: {
+    marginTop: 2,
+    color: '#bbb',
+    fontSize: 12,
   },
   // Modal + input styles (match app theme)
   modalOverlay: {

@@ -23,6 +23,7 @@ export interface DoseLogEntry {
   at: string; // ISO timestamp of intake
   value: number; // amount taken at that time
   unit: DosageUnit; // unit of the amount
+  note?: string; // optional note entered by the user
 }
 
 export interface DoseDecreaseTrackedItem extends TrackedItem {

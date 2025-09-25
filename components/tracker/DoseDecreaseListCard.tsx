@@ -16,6 +16,7 @@ type Props = {
 export function DoseDecreaseListCard({ item, onPress }: Props) {
   const { updateItem } = useTrackedItems();
   const [doseInput, setDoseInput] = useState<string>('');
+  const [noteInput, setNoteInput] = useState<string>('');
   const daysTracked = calculateDaysTracked(item.startedAt);
   const icon = getTrackerIcon(item.type);
   const todayTotal = getTodaysDoseTotal(item);
@@ -29,6 +30,7 @@ export function DoseDecreaseListCard({ item, onPress }: Props) {
     if (!canLog) return;
     const amount = parseFloat(doseInput);
     if (!Number.isFinite(amount) || amount <= 0) return;
+    const trimmedNote = noteInput.trim();
 
     const next = {
       ...item,
@@ -38,11 +40,13 @@ export function DoseDecreaseListCard({ item, onPress }: Props) {
           at: new Date().toISOString(),
           value: amount,
           unit: item.currentUsageUnit,
+          ...(trimmedNote ? { note: trimmedNote } : {}),
         },
       ],
     } as DoseDecreaseTrackedItem;
     updateItem(next);
     setDoseInput('');
+    setNoteInput('');
   };
 
   return (
@@ -82,6 +86,15 @@ export function DoseDecreaseListCard({ item, onPress }: Props) {
           <Text style={styles.logButtonText}>Log</Text>
         </TouchableOpacity>
       </View>
+      <TextInput
+        value={noteInput}
+        onChangeText={setNoteInput}
+        placeholder="Note (optional)"
+        placeholderTextColor="#888"
+        style={[styles.input, { marginTop: 10 }]}
+        accessibilityLabel="Optional note for this dose"
+        returnKeyType="done"
+      />
       {daysTracked !== null ? (
         <Text style={[styles.metaText, styles.doseMetaText]}>
           {daysTracked} {daysTracked === 1 ? 'day' : 'days'} of progress
