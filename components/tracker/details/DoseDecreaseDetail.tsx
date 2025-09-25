@@ -209,6 +209,7 @@ export function DoseDecreaseDetail(props: DoseDecreaseDetailProps) {
                     const valueLabel = Number.isInteger(entry.value) ? `${entry.value}` : entry.value.toFixed(1);
                     return (
                       <View key={`${entry.date.toISOString()}-${idx}`} style={styles.barContainer} accessibilityLabel={`${dayLabel}: ${valueLabel} ${item.currentUsageUnit}`}>
+                        <Text style={styles.barValueLabel}>{valueLabel} {item.currentUsageUnit}</Text>
                         <View style={[styles.bar, { height: barHeight }]} />
                         <Text style={styles.barDayLabel}>{dayLabel}</Text>
                       </View>
@@ -385,6 +386,12 @@ const styles = StyleSheet.create({
     color: '#ccc',
     fontSize: 12,
     fontWeight: '600',
+  },
+  barValueLabel: {
+    color: '#fb923c',
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 4,
   },
   emptyText: {
     marginTop: 8,
