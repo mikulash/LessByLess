@@ -28,19 +28,7 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
   const progressPercent = progress.next ? progress.progressToNext : 1;
   const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
 
-  // Distinct milestone colors (avoid green and orange)
-  const MILESTONE_COLORS = [
-    { border: '#60a5fa', bg: 'rgba(96, 165, 250, 0.16)', iconBg: 'rgba(96, 165, 250, 0.22)', text: '#dbeafe' }, // blue
-    { border: '#818cf8', bg: 'rgba(129, 140, 248, 0.16)', iconBg: 'rgba(129, 140, 248, 0.22)', text: '#e0e7ff' }, // indigo
-    { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.16)', iconBg: 'rgba(139, 92, 246, 0.22)', text: '#ede9fe' }, // violet
-    { border: '#a78bfa', bg: 'rgba(167, 139, 250, 0.16)', iconBg: 'rgba(167, 139, 250, 0.22)', text: '#ede9fe' }, // purple
-    { border: '#e879f9', bg: 'rgba(232, 121, 249, 0.16)', iconBg: 'rgba(232, 121, 249, 0.22)', text: '#f5d0fe' }, // fuchsia
-    { border: '#f472b6', bg: 'rgba(244, 114, 182, 0.16)', iconBg: 'rgba(244, 114, 182, 0.22)', text: '#fbcfe8' }, // pink
-    { border: '#fb7185', bg: 'rgba(251, 113, 133, 0.16)', iconBg: 'rgba(251, 113, 133, 0.22)', text: '#ffe4e6' }, // rose
-    { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.16)', iconBg: 'rgba(239, 68, 68, 0.22)', text: '#fecaca' }, // red
-    { border: '#38bdf8', bg: 'rgba(56, 189, 248, 0.16)', iconBg: 'rgba(56, 189, 248, 0.22)', text: '#cffafe' }, // sky
-    { border: '#22d3ee', bg: 'rgba(34, 211, 238, 0.16)', iconBg: 'rgba(34, 211, 238, 0.22)', text: '#a5f3fc' }, // cyan
-  ];
+  // Milestone colors now come from constants/coldTurkeyMilestones.ts
 
   return (
     <TrackerDetailTemplate
@@ -56,7 +44,7 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
               </View>
             </View>
             <Text style={styles.summarySubtitle}>Cold turkey commitment</Text>
-            <Text style={styles.summaryMeta}>Since {formatDateForDisplay(item.startedAt)}</Text>
+            {/*<Text style={styles.summaryMeta}>Since {formatDateForDisplay(item.startedAt)}</Text>*/}
             <View style={styles.breakdownStack}>
               {breakdown.map((entry, index) => (
                 <Text
@@ -97,7 +85,7 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
                 >
                   {progress.achieved.map((milestone, idx) => {
                     const isLatest = idx === progress.achieved.length - 1;
-                    const c = MILESTONE_COLORS[idx % MILESTONE_COLORS.length];
+                    const c = milestone.color ?? { border: '#60a5fa', bg: 'rgba(96, 165, 250, 0.16)', iconBg: 'rgba(96, 165, 250, 0.22)', text: '#dbeafe' };
                     return (
                       <View
                         key={milestone.label}

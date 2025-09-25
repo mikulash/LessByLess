@@ -101,10 +101,11 @@ export const getElapsedBreakdown = (
 ): ElapsedBreakdownEntry[] => {
     const result: ElapsedBreakdownEntry[] = [];
     let remainder = Math.max(0, elapsedMs);
+    let lastAddedIndex = -1; // index into TIME_UNITS for the last non-zero unit we added
 
-    for (const unit of TIME_UNITS) {
+    for (let i = 0; i < TIME_UNITS.length; i++) {
         if (result.length >= parts) break;
-
+        const unit = TIME_UNITS[i];
         const count = Math.floor(remainder / unit.durationMs);
         if (count > 0) {
             result.push({
@@ -112,6 +113,7 @@ export const getElapsedBreakdown = (
                 unit: count === 1 ? unit.label : `${unit.label}s`,
             });
             remainder -= count * unit.durationMs;
+            lastAddedIndex = i;
         }
     }
 
@@ -120,6 +122,17 @@ export const getElapsedBreakdown = (
         const sec = TIME_UNITS[TIME_UNITS.length - 1]; // seconds
         const count = Math.floor(remainder / sec.durationMs); // 0 for <1s
         result.push({ value: count, unit: 'seconds' });
+    } else if (result.length < parts) {
+        // Also show the next smaller unit even if it's 0 (e.g., "5 minutes 0 seconds")
+        const nextIndex = lastAddedIndex + 1;
+        if (nextIndex > lastAddedIndex && nextIndex < TIME_UNITS.length) {
+            const nextUnit = TIME_UNITS[nextIndex];
+            const nextCount = Math.floor(remainder / nextUnit.durationMs); // likely 0
+            result.push({
+                value: nextCount,
+                unit: nextCount === 1 ? nextUnit.label : `${nextUnit.label}s`,
+            });
+        }
     }
 
     return result;
