@@ -1,11 +1,12 @@
 import { FontAwesome6 } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View, TextInput } from 'react-native';
 
 import { Text } from '@/components/Themed';
 import { DoseDecreaseTrackedItem } from '@/types/tracking';
 import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
-import { getTrackerIcon } from '@/utils/tracker';
+import { getTodaysDoseTotal, getTrackerIcon } from '@/utils/tracker';
+import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 
 type Props = {
   item: DoseDecreaseTrackedItem;
@@ -13,8 +14,36 @@ type Props = {
 };
 
 export function DoseDecreaseListCard({ item, onPress }: Props) {
+  const { updateItem } = useTrackedItems();
+  const [doseInput, setDoseInput] = useState<string>('');
   const daysTracked = calculateDaysTracked(item.startedAt);
   const icon = getTrackerIcon(item.type);
+  const todayTotal = getTodaysDoseTotal(item);
+  const formattedTotal = Number.isInteger(todayTotal.value)
+    ? todayTotal.value.toString()
+    : todayTotal.value.toFixed(2);
+
+  const canLog = doseInput.trim().length > 0 && !Number.isNaN(Number(doseInput));
+
+  const handleLogDose = () => {
+    if (!canLog) return;
+    const amount = parseFloat(doseInput);
+    if (!Number.isFinite(amount) || amount <= 0) return;
+
+    const next = {
+      ...item,
+      doseLogs: [
+        ...(item.doseLogs ?? []),
+        {
+          at: new Date().toISOString(),
+          value: amount,
+          unit: item.currentUsageUnit,
+        },
+      ],
+    } as DoseDecreaseTrackedItem;
+    updateItem(next);
+    setDoseInput('');
+  };
 
   return (
     <TouchableOpacity
@@ -29,6 +58,30 @@ export function DoseDecreaseListCard({ item, onPress }: Props) {
         </View>
       </View>
       <Text style={styles.subtitle}>Gradually reducing since {formatDateForDisplay(item.startedAt)}</Text>
+      <Text style={[styles.metaText, styles.doseMetaText]}>
+        {`Today's total: ${formattedTotal} ${todayTotal.unit}`}
+      </Text>
+      <View style={styles.inputRow}>
+        <TextInput
+          value={doseInput}
+          onChangeText={setDoseInput}
+          placeholder={`Amount (${item.currentUsageUnit})`}
+          placeholderTextColor="#888"
+          style={[styles.input, { flex: 1, marginBottom: 0 }]}
+          keyboardType="decimal-pad"
+          inputMode="decimal"
+          accessibilityLabel="Dose amount"
+        />
+        <TouchableOpacity
+          onPress={handleLogDose}
+          style={[styles.logButton, !canLog && styles.disabledButton]}
+          disabled={!canLog}
+          accessibilityRole="button"
+          accessibilityLabel={`Log dose in ${item.currentUsageUnit}`}
+        >
+          <Text style={styles.logButtonText}>Log</Text>
+        </TouchableOpacity>
+      </View>
       {daysTracked !== null ? (
         <Text style={[styles.metaText, styles.doseMetaText]}>
           {daysTracked} {daysTracked === 1 ? 'day' : 'days'} of progress
@@ -84,5 +137,33 @@ const styles = StyleSheet.create({
   },
   doseMetaText: {
     color: '#fb923c',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+  },
+  input: {
+    backgroundColor: '#2a2a35',
+    color: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  logButton: {
+    backgroundColor: '#fb923c',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logButtonText: {
+    color: '#1f1f29',
+    fontWeight: '700',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });

@@ -19,10 +19,17 @@ export interface ColdTurkeyTrackedItem extends TrackedItem {
 
 export type DosageUnit = 'mg' | 'g';
 
+export interface DoseLogEntry {
+  at: string; // ISO timestamp of intake
+  value: number; // amount taken at that time
+  unit: DosageUnit; // unit of the amount
+}
+
 export interface DoseDecreaseTrackedItem extends TrackedItem {
   type: TrackerType.SlowLoweringTheDosage;
   currentUsageValue: number;
   currentUsageUnit: DosageUnit;
+  doseLogs?: DoseLogEntry[]; // individual intakes; summed per day for totals
 }
 
 export type TrackerItem = ColdTurkeyTrackedItem | DoseDecreaseTrackedItem;

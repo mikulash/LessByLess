@@ -3,6 +3,7 @@ import {
   type ColdTurkeyMilestone,
 } from '@/constants/coldTurkeyMilestones';
 import { TrackerType } from '@/enums/TrackerType';
+import type { DoseDecreaseTrackedItem, DosageUnit } from '@/types/tracking';
 
 type TimeUnit = {
   label: string;
@@ -26,6 +27,39 @@ export const getTrackerIcon = (type: TrackerType) => {
   }
 
   return { name: 'hand-back-fist' as const, color: '#34d399' };
+};
+
+const convertAmount = (value: number, from: DosageUnit, to: DosageUnit): number => {
+  if (from === to) return value;
+  // mg <-> g conversion
+  return from === 'mg' && to === 'g' ? value / 1000 : value * 1000;
+};
+
+export const getTodaysDoseTotal = (
+  item: DoseDecreaseTrackedItem
+): { value: number; unit: DosageUnit } => {
+  const logs = item.doseLogs ?? [];
+  if (logs.length === 0) return { value: 0, unit: item.currentUsageUnit };
+
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+  // Accumulate in mg as a base unit
+  let totalMg = 0;
+  for (const log of logs) {
+    const at = new Date(log.at);
+    if (Number.isNaN(at.getTime())) continue;
+    if (at >= startOfDay && at < endOfDay) {
+      const asMg = convertAmount(log.value, log.unit, 'mg');
+      totalMg += asMg;
+    }
+  }
+
+  // Convert to the tracker's display unit
+  const displayUnit = item.currentUsageUnit;
+  const value = convertAmount(totalMg, 'mg', displayUnit);
+  return { value, unit: displayUnit };
 };
 
 export type ColdTurkeyProgress = {
