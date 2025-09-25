@@ -67,11 +67,22 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
                 </Text>
               ))}
             </View>
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${Math.round(progressPercent * 100)}%` }]} />
+            {/* Stepper-style progress (green + shows fill progress) */}
+            <View style={styles.stepperContainer} accessibilityLabel="Progress timeline">
+              <View style={styles.stepperLine} />
+              <View style={[styles.stepperFillLine, { width: `${Math.round(progressPercent * 100)}%` }]} />
+              <View style={[styles.stepperDot, styles.stepperDotLeft]}>
+                <View style={styles.stepperDotInner} />
               </View>
-              <Text style={styles.progressLabel}>{nextLabel}</Text>
+              <View style={[styles.stepperDot, styles.stepperDotRight]}>
+                <View style={styles.stepperDotInner} />
+              </View>
+            </View>
+            <View style={styles.stepperLabels}>
+              <Text style={styles.stepperLabel}>{formatDateForDisplay(item.startedAt)}</Text>
+              <Text style={[styles.stepperLabel, styles.stepperLabelRight]}>
+                {progress.next ? progress.next.label : 'All milestones achieved'}
+              </Text>
             </View>
             {progress.achieved.length ? (
               <View style={styles.milestonesSection}>
@@ -193,6 +204,66 @@ const styles = StyleSheet.create({
     color: '#a7f3d0',
     fontSize: 13,
     fontWeight: '600',
+  },
+  // Stepper styles
+  stepperContainer: {
+    marginTop: 16,
+    height: 38,
+    justifyContent: 'center',
+  },
+  stepperLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 18,
+    height: 4,
+    backgroundColor: 'rgba(52, 211, 153, 0.25)', // green track
+    borderRadius: 2,
+  },
+  stepperFillLine: {
+    position: 'absolute',
+    left: 0,
+    top: 18,
+    height: 4,
+    backgroundColor: '#34d399', // green fill
+    borderRadius: 2,
+  },
+  stepperDot: {
+    position: 'absolute',
+    top: 7,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 3,
+    borderColor: '#34d399',
+    backgroundColor: '#18181f',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepperDotInner: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#34d399',
+  },
+  stepperDotLeft: {
+    left: 0,
+  },
+  stepperDotRight: {
+    right: 0,
+  },
+  stepperLabels: {
+    marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  stepperLabel: {
+    color: '#a7f3d0',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  stepperLabelRight: {
+    textAlign: 'right',
   },
   milestonesSection: {
     marginTop: 18,
