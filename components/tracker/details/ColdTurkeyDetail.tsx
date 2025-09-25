@@ -28,6 +28,20 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
   const progressPercent = progress.next ? progress.progressToNext : 1;
   const nextLabel = progress.next ? `Next milestone: ${progress.next.label}` : 'All milestones achieved';
 
+  // Distinct milestone colors (avoid green and orange)
+  const MILESTONE_COLORS = [
+    { border: '#60a5fa', bg: 'rgba(96, 165, 250, 0.16)', iconBg: 'rgba(96, 165, 250, 0.22)', text: '#dbeafe' }, // blue
+    { border: '#818cf8', bg: 'rgba(129, 140, 248, 0.16)', iconBg: 'rgba(129, 140, 248, 0.22)', text: '#e0e7ff' }, // indigo
+    { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.16)', iconBg: 'rgba(139, 92, 246, 0.22)', text: '#ede9fe' }, // violet
+    { border: '#a78bfa', bg: 'rgba(167, 139, 250, 0.16)', iconBg: 'rgba(167, 139, 250, 0.22)', text: '#ede9fe' }, // purple
+    { border: '#e879f9', bg: 'rgba(232, 121, 249, 0.16)', iconBg: 'rgba(232, 121, 249, 0.22)', text: '#f5d0fe' }, // fuchsia
+    { border: '#f472b6', bg: 'rgba(244, 114, 182, 0.16)', iconBg: 'rgba(244, 114, 182, 0.22)', text: '#fbcfe8' }, // pink
+    { border: '#fb7185', bg: 'rgba(251, 113, 133, 0.16)', iconBg: 'rgba(251, 113, 133, 0.22)', text: '#ffe4e6' }, // rose
+    { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.16)', iconBg: 'rgba(239, 68, 68, 0.22)', text: '#fecaca' }, // red
+    { border: '#38bdf8', bg: 'rgba(56, 189, 248, 0.16)', iconBg: 'rgba(56, 189, 248, 0.22)', text: '#cffafe' }, // sky
+    { border: '#22d3ee', bg: 'rgba(34, 211, 238, 0.16)', iconBg: 'rgba(34, 211, 238, 0.22)', text: '#a5f3fc' }, // cyan
+  ];
+
   return (
     <TrackerDetailTemplate
       {...props}
@@ -61,17 +75,35 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
             </View>
             {progress.achieved.length ? (
               <View style={styles.milestonesSection}>
-                <Text style={styles.milestonesTitle}>Milestones achieved</Text>
+                <View style={styles.milestonesTitleRow}>
+                  <Text style={styles.milestonesTitle}>Milestones achieved</Text>
+                  <FontAwesome6 name="trophy" size={14} color="#60a5fa" />
+                </View>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.milestonesList}
                 >
-                  {progress.achieved.map((milestone) => (
-                    <View key={milestone.label} style={styles.milestoneChip}>
-                      <Text style={styles.milestoneChipText}>{milestone.label}</Text>
-                    </View>
-                  ))}
+                  {progress.achieved.map((milestone, idx) => {
+                    const isLatest = idx === progress.achieved.length - 1;
+                    const c = MILESTONE_COLORS[idx % MILESTONE_COLORS.length];
+                    return (
+                      <View
+                        key={milestone.label}
+                        style={[
+                          styles.milestoneChip,
+                          isLatest && styles.milestoneChipLatest,
+                          { backgroundColor: c.bg, borderColor: c.border, shadowColor: c.border },
+                        ]}
+                        accessibilityLabel={`Achieved milestone: ${milestone.label}`}
+                      >
+                        <View style={[styles.milestoneIconWrap, { backgroundColor: c.iconBg, borderColor: c.border }]}>
+                          <FontAwesome6 name="trophy" size={12} color={c.border} />
+                        </View>
+                        <Text style={[styles.milestoneChipText, { color: c.text }]}>{milestone.label}</Text>
+                      </View>
+                    );
+                  })}
                 </ScrollView>
               </View>
             ) : null}
@@ -171,22 +203,46 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 14,
   },
+  milestonesTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   milestonesList: {
     flexDirection: 'row',
     gap: 10,
     paddingRight: 6,
   },
   milestoneChip: {
-    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(52, 211, 153, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(52, 211, 153, 0.4)',
+    // subtle glow (color applied inline per milestone)
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  milestoneChipLatest: {
+    borderWidth: 1.5,
+    shadowRadius: 8,
+  },
+  milestoneIconWrap: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    // colors applied inline per milestone
   },
   milestoneChipText: {
-    color: '#d1fae5',
+    color: '#e5e7eb',
     fontWeight: '600',
-    fontSize: 12,
+    fontSize: 13,
   },
 });
