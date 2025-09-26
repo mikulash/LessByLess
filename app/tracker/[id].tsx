@@ -61,10 +61,28 @@ export default function TrackerDetailScreen() {
         text: 'Reset',
         style: 'default',
         onPress: () => {
-          const today = new Date();
+          const resetAt = new Date().toISOString();
+
+          if (trackedItem.type === TrackerType.ColdTurkey) {
+            const history = trackedItem.resetHistory ?? [];
+            const updatedItem = {
+              ...trackedItem,
+              startedAt: resetAt,
+              resetHistory: [
+                ...history,
+                {
+                  startedAt: trackedItem.startedAt,
+                  resetAt,
+                },
+              ],
+            };
+            updateItem(updatedItem);
+            return;
+          }
+
           const updatedItem: TrackerItem = {
             ...trackedItem,
-            startedAt: today.toISOString(),
+            startedAt: resetAt,
           };
           updateItem(updatedItem);
         },

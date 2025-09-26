@@ -35,7 +35,11 @@ export function TrackedItemsProvider({ children }: PropsWithChildren) {
             if (stored) {
                 const parsed: TrackerItem[] = JSON.parse(stored).map((item: TrackerItem) =>
                     item.type === TrackerType.ColdTurkey
-                        ? { ...item, notifiedMilestones: item.notifiedMilestones ?? [] }
+                        ? {
+                            ...item,
+                            notifiedMilestones: item.notifiedMilestones ?? [],
+                            resetHistory: item.resetHistory ?? [],
+                        }
                         : item
                 );
                 setItems(parsed);

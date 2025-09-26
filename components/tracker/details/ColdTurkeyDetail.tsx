@@ -6,9 +6,22 @@ import { Text } from '@/components/Themed';
 import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
 import { formatDateForDisplay } from '@/utils/date';
-import { getColdTurkeyProgress, getTrackerIcon } from '@/utils/tracker';
+import { getColdTurkeyProgress, getElapsedBreakdown, getTrackerIcon } from '@/utils/tracker';
 
 import { TrackerDetailTemplate } from './TrackerDetailTemplate';
+
+const formatElapsedDuration = (elapsedMs: number): string => {
+  if (!Number.isFinite(elapsedMs) || elapsedMs < 1000) {
+    return 'Less than a second';
+  }
+
+  const parts = getElapsedBreakdown(elapsedMs, 2);
+  if (!parts.length) {
+    return 'Less than a second';
+  }
+
+  return parts.map((entry) => `${entry.value} ${entry.unit}`).join(' ');
+};
 
 type ColdTurkeyDetailProps = {
   item: ColdTurkeyTrackedItem;
@@ -34,6 +47,33 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
       {...props}
       renderSummary={(item) => {
         const icon = getTrackerIcon(item.type);
+        const resetHistory = [...(item.resetHistory ?? [])]
+          .filter((entry) => {
+            const start = new Date(entry.startedAt).getTime();
+            const reset = new Date(entry.resetAt).getTime();
+            return Number.isFinite(start) && Number.isFinite(reset) && reset >= start;
+          })
+          .sort((a, b) => new Date(b.resetAt).getTime() - new Date(a.resetAt).getTime());
+
+        const resetRows = resetHistory.map((entry, index) => {
+          const rangeLabel = `${formatDateForDisplay(entry.startedAt)} - ${formatDateForDisplay(entry.resetAt)}`;
+          const durationMs = new Date(entry.resetAt).getTime() - new Date(entry.startedAt).getTime();
+          const durationLabel = formatElapsedDuration(durationMs);
+          const subtitle = `${rangeLabel}${durationLabel ? ` - ${durationLabel}` : ''}`;
+
+          return (
+            <View key={`${entry.resetAt}-${index}`} style={styles.resetRow}>
+              <View style={styles.resetRowBullet} />
+              <View style={styles.resetRowContent}>
+                <Text style={styles.resetRowTitle}>{`Reset on ${formatDateForDisplay(entry.resetAt)}`}</Text>
+                <Text style={styles.resetRowSubtitle}>{subtitle}</Text>
+              </View>
+            </View>
+          );
+        });
+
+        const currentDuration = formatElapsedDuration(progress.elapsedMs);
+        const currentSubtitle = `${formatDateForDisplay(item.startedAt)} - Present${currentDuration ? ` - ${currentDuration}${currentDuration === 'Less than a second' ? '' : ' so far'}` : ''}`;
         return (
           <View style={[styles.summaryCard, styles.coldSummary]}>
             <View style={styles.summaryHeader}>
@@ -104,6 +144,28 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
                 </ScrollView>
               </View>
             ) : null}
+
+            <View style={styles.resetHistorySection}>
+              <View style={styles.resetHistoryHeader}>
+                <FontAwesome6 name="clock-rotate-left" size={14} color="#6ee7b7" />
+                <Text style={styles.resetHistoryTitle}>Reset timeline</Text>
+              </View>
+
+              <View style={styles.resetTimeline}>
+                <View style={styles.resetRow}>
+                  <View style={[styles.resetRowBullet, styles.resetRowBulletCurrent]} />
+                  <View style={styles.resetRowContent}>
+                    <Text style={styles.resetRowTitle}>Current streak</Text>
+                    <Text style={styles.resetRowSubtitle}>{currentSubtitle}</Text>
+                  </View>
+                </View>
+                {resetRows}
+              </View>
+
+              {resetRows.length === 0 ? (
+                <Text style={styles.resetHistoryEmptyText}>No previous resets logged yet.</Text>
+              ) : null}
+            </View>
           </View>
         );
       }}
@@ -301,5 +363,62 @@ const styles = StyleSheet.create({
     color: '#e5e7eb',
     fontWeight: '600',
     fontSize: 13,
+  },
+  resetHistorySection: {
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(110, 231, 183, 0.2)',
+    gap: 12,
+  },
+  resetHistoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  resetHistoryTitle: {
+    color: '#6ee7b7',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  resetTimeline: {
+    marginTop: 8,
+    gap: 12,
+  },
+  resetRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  resetRowBullet: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 6,
+    backgroundColor: 'rgba(110, 231, 183, 0.3)',
+  },
+  resetRowBulletCurrent: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#34d399',
+  },
+  resetRowContent: {
+    flex: 1,
+  },
+  resetRowTitle: {
+    color: '#e5e7eb',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  resetRowSubtitle: {
+    color: '#9ca3af',
+    marginTop: 4,
+    fontSize: 12,
+  },
+  resetHistoryEmptyText: {
+    color: '#6b7280',
+    fontSize: 12,
+    marginTop: 8,
   },
 });

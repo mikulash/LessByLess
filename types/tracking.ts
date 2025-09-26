@@ -1,4 +1,4 @@
-﻿import { TrackerType } from '@/enums/TrackerType';
+import { TrackerType } from '@/enums/TrackerType';
 
 export type TrackerTypeOption = {
   value: TrackerType;
@@ -13,8 +13,14 @@ export interface TrackedItem {
   notifiedMilestones?: number[];
 }
 
+export interface ColdTurkeyResetEntry {
+  startedAt: string;
+  resetAt: string;
+}
+
 export interface ColdTurkeyTrackedItem extends TrackedItem {
   type: TrackerType.ColdTurkey;
+  resetHistory?: ColdTurkeyResetEntry[];
 }
 
 export type DosageUnit = 'mg' | 'g';

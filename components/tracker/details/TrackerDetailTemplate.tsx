@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     flex: 1,
-    backgroundColor: '#2a2a35',
+    backgroundColor: '#fa834cff',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',

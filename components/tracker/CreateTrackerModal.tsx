@@ -1,4 +1,4 @@
-﻿import {
+import {
     DateTimePickerAndroid,
     type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
@@ -16,7 +16,7 @@ import { TRACKER_TYPES } from '@/constants/trackerTypes';
 import { useTrackedItems } from '@/contexts/TrackedItemsContext';
 import { TrackerType } from '@/enums/TrackerType';
 import { formatDateForDisplay } from '@/utils/date';
-import { TrackerItem, DoseDecreaseTrackedItem, DosageUnit } from '@/types/tracking';
+import { ColdTurkeyTrackedItem, DoseDecreaseTrackedItem, DosageUnit } from '@/types/tracking';
 
 type CreateTrackerModalProps = {
     visible: boolean;
@@ -103,12 +103,13 @@ export function CreateTrackerModal({ visible, onClose }: CreateTrackerModalProps
             };
             addItem(item);
         } else {
-            const item: TrackerItem = {
+            const item: ColdTurkeyTrackedItem = {
                 id: `${Date.now()}`,
                 name: trimmedName,
                 startedAt: date.toISOString(),
                 notifiedMilestones: [],
                 type: TrackerType.ColdTurkey,
+                resetHistory: [],
             };
             addItem(item);
         }
