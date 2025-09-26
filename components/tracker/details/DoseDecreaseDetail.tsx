@@ -74,7 +74,7 @@ export function DoseDecreaseDetail(props: DoseDecreaseDetailProps) {
     }
     result.sort((a, b) => a.date.getTime() - b.date.getTime());
     return result;
-  }, [item]);
+  }, [item.doseLogs, item.currentUsageUnit]);
 
   const [weekIndex, setWeekIndex] = useState(0); // 0 = current week, 1 = prev week, ...
   const maxWeekIndex = useMemo(() => {
@@ -106,7 +106,7 @@ export function DoseDecreaseDetail(props: DoseDecreaseDetailProps) {
       .map((l) => ({ ...l, atDate: new Date(l.at) }))
       .filter((l) => !Number.isNaN(l.atDate.getTime()) && l.atDate >= start && l.atDate < end)
       .sort((a, b) => a.atDate.getTime() - b.atDate.getTime());
-  }, [item]);
+  }, [item.doseLogs]);
 
   const promptLogActions = (logAt: string, currentVal: number) => {
     Alert.alert('Log entry', 'Choose an action', [
