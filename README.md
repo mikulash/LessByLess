@@ -1,8 +1,11 @@
 # LessByLess - habit quiting
 
-I made this app mostly for myself to follow some of my requirements. Privacy— data, logs, or anything never leaves your device. Simplicity—easy to use, no unnecessary features or complexity. But if you have some useful feature in mind, let me know via suggesting it on GitHub or fork it and add it yourself.
+I made this app mostly for myself to follow some of my requirements. Privacy— data, logs, or anything never leaves your
+device. Simplicity—easy to use, no unnecessary features or complexity. But if you have some useful feature in mind, let
+me know via suggesting it on GitHub or fork it and add it yourself.
 
-Also, taking some supplements is often just as a part of a routine, so I wanted to track notes as well when the dosage lowering tracker, so you can track why you took each dose—before gym, before studying, before some task, etc.
+Also, taking some supplements is often just as a part of a routine, so I wanted to track notes as well when the dosage
+lowering tracker, so you can track why you took each dose—before gym, before studying, before some task, etc.
 
 Built with Expo Router, React Native, and local persistence (AsyncStorage). Runs on Android but potentially iOS as well.
 
@@ -17,32 +20,44 @@ Built with Expo Router, React Native, and local persistence (AsyncStorage). Runs
 
 Place your screenshots in `docs/screenshots/` and they will render here once committed.
 
-- Home (empty state)
-  ![Home – Empty](docs/screenshots/MainPageEmpty.png)
-- Home (with trackers)
-  ![Home – List](docs/screenshots/MainPageWithItems.png)
-- Create Tracker modal
-  ![Create Tracker](docs/screenshots/CreateTrackerColdTurkey.png)
-  ![Create Tracker](docs/screenshots/CreateTrackerDosageLowering.png)
-- Cold Turkey detail
-  ![Cold Turkey Detail](docs/screenshots/ColdTurkeyDetail.png)
-- Dosage Lowering detail
-  ![Dosage Detail](docs/screenshots/DosageLoweringDetail.png)
-  ![Dosage Detail](docs/screenshots/DosageLoweringDetailWithLogs.png)
+#### Home (empty state)
+
+  <img src="docs/screenshots/MainPageEmpty.png" alt="Home – Empty" style="max-width: 400px;" />
+
+#### Home (with trackers)
+
+  <img src="docs/screenshots/MainPageWithItems.png" alt="Home – List" style="max-width: 400px;" />
+
+#### Create Tracker modal
+
+  <img src="docs/screenshots/CreateTrackerColdTurkey.png" alt="Create Tracker" style="max-width: 400px;" />
+  <img src="docs/screenshots/CreateTrackerDosageLowering.png" alt="Create Tracker" style="max-width: 400px;" />
+
+#### Cold Turkey detail
+
+<img src="docs/screenshots/ColdTurkeyDetail.png" alt="Cold Turkey Detail" style="max-width: 400px;" />
+
+#### Dosage Lowering detail
+
+<img src="docs/screenshots/DosageLoweringDetail.png" alt="Dosage Detail" style="max-width: 400px;" />
+<img src="docs/screenshots/DosageLoweringDetailWithLogs.png" alt="Dosage Detail" style="max-width: 400px;" />
 
 ## Quick Start
 
 Prerequisites
+
 - Node 18+ and npm 9+
 - iOS: Xcode + Simulator (macOS)
 - Android: Android Studio + emulator
 
 Install and run
+
 - `npm install`
 - `npm start` – launches the Expo dev server
-  - Press `a` for Android, `i` for iOS, or `w` for Web
+    - Press `a` for Android, `i` for iOS, or `w` for Web
 
 Convenience scripts
+
 - `npm run android`
 - `npm run ios`
 - `npm run web`
@@ -57,7 +72,6 @@ Convenience scripts
 - `constants/` – tracker types, milestone definitions, storage keys
 - `types/` and `enums/` – TypeScript models for tracked items
 - `assets/` – icons, fonts, splash
-
 
 ## Contributing
 
