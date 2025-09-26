@@ -1,9 +1,8 @@
 # LessByLess - habit quiting
 
-I made this app mostly for myself to follow some my requirements. Privacy—all tracking is local, data, logs or anything nevel leave your device. Simplicity—easy to use, no unnecessary features or complexity.
+I made this app mostly for myself to follow some of my requirements. Privacy— data, logs, or anything never leaves your device. Simplicity—easy to use, no unnecessary features or complexity. But if you have some useful feature in mind, let me know via suggesting it on GitHub or fork it and add it yourself.
 
-Also taking some suplements I do is often just as a part of a routine, so I wanted to track dosage lowering as well with notes so you can track why you took each dose - before gym, before studying, before some task etc.
-
+Also, taking some supplements is often just as a part of a routine, so I wanted to track notes as well when the dosage lowering tracker, so you can track why you took each dose—before gym, before studying, before some task, etc.
 
 Built with Expo Router, React Native, and local persistence (AsyncStorage). Runs on Android but potentially iOS as well.
 
