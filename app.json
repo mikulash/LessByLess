@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "ColdTurkey",
-    "slug": "ColdTurkey",
+    "name": "LessByLess",
+    "slug": "LessByLess",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "coldturkey",
+    "scheme": "lessbyless",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.mikulash.ColdTurkey"
+      "package": "com.mikulash.LessByLess"
     },
     "web": {
       "bundler": "metro",
