@@ -24,11 +24,14 @@ export function DoseDecreaseListCard({ item, onPress }: Props) {
     ? todayTotal.value.toString()
     : todayTotal.value.toFixed(2);
 
-  const canLog = doseInput.trim().length > 0 && !Number.isNaN(Number(doseInput));
+  const normalizedInput = doseInput.replace(',', '.');
+
+  const canLog =
+    normalizedInput.trim().length > 0 && !Number.isNaN(Number(normalizedInput));
 
   const handleLogDose = () => {
     if (!canLog) return;
-    const amount = parseFloat(doseInput);
+    const amount = parseFloat(normalizedInput);
     if (!Number.isFinite(amount) || amount <= 0) return;
     const trimmedNote = noteInput.trim();
 
