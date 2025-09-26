@@ -39,8 +39,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "80f38b78-5daf-4604-9a23-f8c63c718422"
+        "projectId": "c67e503e-069d-4e16-a0f3-e574fc25283c"
       }
-    }
+    },
+    "owner": "mikulash"
   }
 }
