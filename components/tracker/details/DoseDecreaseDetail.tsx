@@ -7,6 +7,7 @@ import { DoseDecreaseTrackedItem, DosageUnit } from '@/types/tracking';
 import { calculateDaysTracked, formatDateForDisplay } from '@/utils/date';
 import { getTrackerIcon } from '@/utils/tracker';
 import { useTrackedItems } from '@/contexts/TrackedItemsContext';
+import { useWidgetPreferences } from '@/contexts/WidgetPreferencesContext';
 
 import { TrackerDetailTemplate } from './TrackerDetailTemplate';
 
@@ -24,6 +25,11 @@ type DoseDecreaseDetailProps = {
 export function DoseDecreaseDetail(props: DoseDecreaseDetailProps) {
   const { item } = props;
   const { updateItem } = useTrackedItems();
+  const {
+    selectedTrackerId,
+    isLoading: widgetIsLoading,
+    setSelectedTrackerId,
+  } = useWidgetPreferences();
 
   const [editAt, setEditAt] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>('');
@@ -145,6 +151,12 @@ export function DoseDecreaseDetail(props: DoseDecreaseDetailProps) {
     updateItem(next);
     setEditAt(null);
     setEditValue('');
+  };
+
+  const isPinnedToWidget = selectedTrackerId === item.id;
+
+  const toggleWidgetPin = () => {
+    void setSelectedTrackerId(isPinnedToWidget ? null : item.id);
   };
 
   return (
@@ -284,6 +296,51 @@ export function DoseDecreaseDetail(props: DoseDecreaseDetailProps) {
           </>
         );
       }}
+      children={
+        <View style={styles.widgetSection}>
+          <Text style={styles.widgetTitle}>Home screen widget</Text>
+          <Text style={styles.widgetDescription}>
+            Pin this tracker to the Android home screen widget to see your daily
+            dosage progress at a glance.
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.widgetButton,
+              isPinnedToWidget && styles.widgetButtonActive,
+              widgetIsLoading && styles.disabledButton,
+            ]}
+            disabled={widgetIsLoading}
+            onPress={toggleWidgetPin}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isPinnedToWidget
+                ? 'Remove this tracker from the home screen widget'
+                : 'Show this tracker on the home screen widget'
+            }
+          >
+            <Text
+              style={
+                isPinnedToWidget
+                  ? styles.widgetButtonActiveText
+                  : styles.widgetButtonText
+              }
+            >
+              {isPinnedToWidget
+                ? 'Pinned to the dosage widget'
+                : 'Show on home widget'}
+            </Text>
+          </TouchableOpacity>
+          {widgetIsLoading ? (
+            <Text style={styles.widgetStatus}>Checking widget settings…</Text>
+          ) : (
+            <Text style={styles.widgetStatus}>
+              {isPinnedToWidget
+                ? 'This tracker will appear on your Android home screen.'
+                : 'Currently no tracker is pinned to the home screen widget.'}
+            </Text>
+          )}
+        </View>
+      }
     />
   );
 }
@@ -439,6 +496,51 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: '#bbb',
     fontSize: 12,
+  },
+  widgetSection: {
+    marginTop: 24,
+    backgroundColor: '#18181f',
+    borderRadius: 20,
+    padding: 20,
+    gap: 12,
+  },
+  widgetTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  widgetDescription: {
+    color: '#b3b3c6',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  widgetButton: {
+    backgroundColor: '#2a2a35',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  widgetButtonActive: {
+    backgroundColor: 'rgba(251, 146, 60, 0.18)',
+    borderWidth: 1,
+    borderColor: '#fb923c',
+  },
+  widgetButtonText: {
+    color: '#fb923c',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  widgetButtonActiveText: {
+    color: '#1f1f29',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  widgetStatus: {
+    color: '#9ca3af',
+    fontSize: 13,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   // Modal + input styles (match app theme)
   modalOverlay: {

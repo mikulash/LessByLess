@@ -8,6 +8,8 @@ import 'react-native-reanimated';
 
 import {useColorScheme} from '@/components/useColorScheme';
 import {TrackedItemsProvider} from '@/contexts/TrackedItemsContext';
+import {WidgetPreferencesProvider} from '@/contexts/WidgetPreferencesContext';
+import '@/widgets/register';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -47,11 +49,13 @@ export default function RootLayout() {
    return (
        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
            <TrackedItemsProvider>
-               <Stack>
-                   <Stack.Screen name="index" options={{headerShown: false}}/>
-                   <Stack.Screen name="tracker/[id]" options={{title: 'Tracker detail'}}/>
-                   <Stack.Screen name="modal" options={{presentation: 'modal'}}/>
-               </Stack>
+               <WidgetPreferencesProvider>
+                   <Stack>
+                       <Stack.Screen name="index" options={{headerShown: false}}/>
+                       <Stack.Screen name="tracker/[id]" options={{title: 'Tracker detail'}}/>
+                       <Stack.Screen name="modal" options={{presentation: 'modal'}}/>
+                   </Stack>
+               </WidgetPreferencesProvider>
            </TrackedItemsProvider>
        </ThemeProvider>
    )

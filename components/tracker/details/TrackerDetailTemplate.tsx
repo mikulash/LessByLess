@@ -14,6 +14,7 @@ type TrackerDetailTemplateProps<ItemType> = {
   disableSave: boolean;
   renderSummary: (item: ItemType) => ReactNode;
   saveLabel?: string;
+  children?: ReactNode;
 };
 
 export function TrackerDetailTemplate<ItemType>({
@@ -27,6 +28,7 @@ export function TrackerDetailTemplate<ItemType>({
   disableSave,
   renderSummary,
   saveLabel = 'Save changes',
+  children,
 }: TrackerDetailTemplateProps<ItemType>) {
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -64,6 +66,8 @@ export function TrackerDetailTemplate<ItemType>({
           </View>
         </View>
       </View>
+
+      {children}
     </ScrollView>
   );
 }

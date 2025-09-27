@@ -31,7 +31,26 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "DosageTrackerWidget",
+              "label": "Dosage tracker",
+              "description": "See today's dosage progress at a glance.",
+              "minWidth": "220dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "widgetFeatures": "reconfigurable|configuration_optional",
+              "updatePeriodMillis": 0
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
