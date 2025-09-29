@@ -12,6 +12,7 @@ Built with Expo Router, React Native, and local persistence (AsyncStorage). Runs
 ## Features
 
 - Add trackers for Cold Turkey or Dosage Lowering
+- As many trackers as you want
 - Cold Turkey milestones with live time breakdown and progress bar
 - Dosage logging with mg/g units, daily totals, and recent timeline
 - Offline-first: data stored locally with AsyncStorage
