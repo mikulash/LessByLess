@@ -1,4 +1,4 @@
-# LessByLess - habit quiting
+# LessByLess - Bad Habit Quitting
 
 I made this app mostly for myself to follow some of my requirements. Privacy— data, logs, or anything never leaves your
 device. Simplicity—easy to use, no unnecessary features or complexity. But if you have some useful feature in mind, let
