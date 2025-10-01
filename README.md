@@ -23,25 +23,25 @@ Place your screenshots in `docs/screenshots/` and they will render here once com
 
 #### Home (empty state)
 
-  <img src="docs/screenshots/MainPageEmpty.png" alt="Home – Empty" style="max-width: 400px;" />
+  <img src="docs/screenshots/MainPageEmpty.png" alt="Home – Empty" width="400" />
 
 #### Home (with trackers)
 
-  <img src="docs/screenshots/MainPageWithItems.png" alt="Home – List" style="max-width: 400px;" />
+  <img src="docs/screenshots/MainPageWithItems.png" alt="Home – List" width="400" />
 
 #### Create Tracker modal
 
-  <img src="docs/screenshots/CreateTrackerColdTurkey.png" alt="Create Tracker" style="max-width: 400px;" />
-  <img src="docs/screenshots/CreateTrackerDosageLowering.png" alt="Create Tracker" style="max-width: 400px;" />
+  <img src="docs/screenshots/CreateTrackerColdTurkey.png" alt="Create Tracker" width="400" />
+  <img src="docs/screenshots/CreateTrackerDosageLowering.png" alt="Create Tracker" width="400" />
 
 #### Cold Turkey detail
 
-<img src="docs/screenshots/ColdTurkeyDetail.png" alt="Cold Turkey Detail" style="max-width: 400px;" />
+<img src="docs/screenshots/ColdTurkeyDetail.png" alt="Cold Turkey Detail" width="400" />
 
 #### Dosage Lowering detail
 
-<img src="docs/screenshots/DosageLoweringDetail.png" alt="Dosage Detail" style="max-width: 400px;" />
-<img src="docs/screenshots/DosageLoweringDetailWithLogs.png" alt="Dosage Detail" style="max-width: 400px;" />
+<img src="docs/screenshots/DosageLoweringDetail.png" alt="Dosage Detail" width="400"/>
+<img src="docs/screenshots/DosageLoweringDetailWithLogs.png" alt="Dosage Detail" width="400"/>
 
 ## Quick Start
 
