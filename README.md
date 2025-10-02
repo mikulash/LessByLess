@@ -1,4 +1,4 @@
-# LessByLess - habit quiting
+# LessByLess - Bad Habit Quitting
 
 I made this app mostly for myself to follow some of my requirements. Privacy— data, logs, or anything never leaves your
 device. Simplicity—easy to use, no unnecessary features or complexity. But if you have some useful feature in mind, let
@@ -12,6 +12,7 @@ Built with Expo Router, React Native, and local persistence (AsyncStorage). Runs
 ## Features
 
 - Add trackers for Cold Turkey or Dosage Lowering
+- As many trackers as you want
 - Cold Turkey milestones with live time breakdown and progress bar
 - Dosage logging with mg/g units, daily totals, and recent timeline
 - Offline-first: data stored locally with AsyncStorage
@@ -22,25 +23,25 @@ Place your screenshots in `docs/screenshots/` and they will render here once com
 
 #### Home (empty state)
 
-  <img src="docs/screenshots/MainPageEmpty.png" alt="Home – Empty" style="max-width: 400px;" />
+  <img src="docs/screenshots/MainPageEmpty.png" alt="Home – Empty" width="400" />
 
 #### Home (with trackers)
 
-  <img src="docs/screenshots/MainPageWithItems.png" alt="Home – List" style="max-width: 400px;" />
+  <img src="docs/screenshots/MainPageWithItems.png" alt="Home – List" width="400" />
 
 #### Create Tracker modal
 
-  <img src="docs/screenshots/CreateTrackerColdTurkey.png" alt="Create Tracker" style="max-width: 400px;" />
-  <img src="docs/screenshots/CreateTrackerDosageLowering.png" alt="Create Tracker" style="max-width: 400px;" />
+  <img src="docs/screenshots/CreateTrackerColdTurkey.png" alt="Create Tracker" width="400" />
+  <img src="docs/screenshots/CreateTrackerDosageLowering.png" alt="Create Tracker" width="400" />
 
 #### Cold Turkey detail
 
-<img src="docs/screenshots/ColdTurkeyDetail.png" alt="Cold Turkey Detail" style="max-width: 400px;" />
+<img src="docs/screenshots/ColdTurkeyDetail.png" alt="Cold Turkey Detail" width="400" />
 
 #### Dosage Lowering detail
 
-<img src="docs/screenshots/DosageLoweringDetail.png" alt="Dosage Detail" style="max-width: 400px;" />
-<img src="docs/screenshots/DosageLoweringDetailWithLogs.png" alt="Dosage Detail" style="max-width: 400px;" />
+<img src="docs/screenshots/DosageLoweringDetail.png" alt="Dosage Detail" width="400"/>
+<img src="docs/screenshots/DosageLoweringDetailWithLogs.png" alt="Dosage Detail" width="400"/>
 
 ## Quick Start
 
