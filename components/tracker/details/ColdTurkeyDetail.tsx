@@ -5,23 +5,16 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/Themed';
 import { useElapsedBreakdown } from '@/hooks/useElapsedBreakdown';
 import { ColdTurkeyTrackedItem } from '@/types/tracking';
-import { formatDateForDisplay } from '@/utils/date';
-import { getColdTurkeyProgress, getElapsedBreakdown, getTrackerIcon } from '@/utils/tracker';
+import { formatDateForDisplay, formatTimeLeft } from '@/utils/date';
+import {
+  formatElapsedDurationLabel,
+  getColdTurkeyProgress,
+  getColdTurkeyStreakTargets,
+  getTrackerIcon,
+} from '@/utils/tracker';
 
 import { TrackerDetailTemplate } from './TrackerDetailTemplate';
 
-const formatElapsedDuration = (elapsedMs: number): string => {
-  if (!Number.isFinite(elapsedMs) || elapsedMs < 1000) {
-    return 'Less than a second';
-  }
-
-  const parts = getElapsedBreakdown(elapsedMs, 2);
-  if (!parts.length) {
-    return 'Less than a second';
-  }
-
-  return parts.map((entry) => `${entry.value} ${entry.unit}`).join(' ');
-};
 
 type ColdTurkeyDetailProps = {
   item: ColdTurkeyTrackedItem;
@@ -47,6 +40,53 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
       {...props}
       renderSummary={(item) => {
         const icon = getTrackerIcon(item.type);
+        const { last, record } = getColdTurkeyStreakTargets(item.resetHistory);
+        const lastDurationMs = last?.durationMs ?? 0;
+        const hasLastTarget = lastDurationMs > 0;
+        const lastProgress = hasLastTarget ? Math.min(1, progress.elapsedMs / lastDurationMs) : 0;
+        const hasGoneLonger = hasLastTarget && progress.elapsedMs >= lastDurationMs;
+        const lastRemainingMs = hasLastTarget ? Math.max(0, lastDurationMs - progress.elapsedMs) : 0;
+        const lastTimeLeftLabel = hasLastTarget && lastRemainingMs > 0 ? formatTimeLeft(lastRemainingMs) : '';
+        const lastDurationLabel = hasLastTarget ? formatElapsedDurationLabel(lastDurationMs) : '';
+
+        const recordDurationMs = record?.durationMs ?? 0;
+        const hasRecordTarget = recordDurationMs > 0;
+        const recordProgress = hasRecordTarget ? Math.min(1, progress.elapsedMs / recordDurationMs) : 0;
+        const recordRemainingMs = hasRecordTarget ? Math.max(0, recordDurationMs - progress.elapsedMs) : 0;
+        const hasHitRecord = hasRecordTarget && progress.elapsedMs >= recordDurationMs;
+        const recordTimeLeftLabel = hasRecordTarget && recordRemainingMs > 0 ? formatTimeLeft(recordRemainingMs) : '';
+        const recordDurationLabel = hasRecordTarget ? formatElapsedDurationLabel(recordDurationMs) : '';
+        const shouldShowRecordProgress = hasRecordTarget && hasGoneLonger;
+        const shouldShowLastProgressBar = hasLastTarget && !hasGoneLonger;
+        const shouldShowRecordProgressBar = shouldShowRecordProgress && !hasHitRecord;
+
+
+        const milestoneChips = [...progress.achieved];
+        if (hasGoneLonger) {
+          milestoneChips.push({
+            label: 'Going longer than last time',
+            durationMs: lastDurationMs || progress.elapsedMs,
+            color: {
+              border: '#facc15',
+              bg: 'rgba(250, 204, 21, 0.16)',
+              iconBg: 'rgba(250, 204, 21, 0.22)',
+              text: '#fef3c7',
+            },
+          });
+        }
+        if (hasHitRecord) {
+          milestoneChips.push({
+            label: 'Record time',
+            durationMs: recordDurationMs || progress.elapsedMs,
+            color: {
+              border: '#fbbf24',
+              bg: 'rgba(251, 191, 36, 0.18)',
+              iconBg: 'rgba(251, 191, 36, 0.24)',
+              text: '#fef9c3',
+            },
+          });
+        }
+        const hasMilestones = milestoneChips.length > 0;
         const resetHistory = [...(item.resetHistory ?? [])]
           .filter((entry) => {
             const start = new Date(entry.startedAt).getTime();
@@ -58,7 +98,7 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
         const resetRows = resetHistory.map((entry, index) => {
           const rangeLabel = `${formatDateForDisplay(entry.startedAt)} - ${formatDateForDisplay(entry.resetAt)}`;
           const durationMs = new Date(entry.resetAt).getTime() - new Date(entry.startedAt).getTime();
-          const durationLabel = formatElapsedDuration(durationMs);
+          const durationLabel = formatElapsedDurationLabel(durationMs);
           const subtitle = `${rangeLabel}${durationLabel ? ` - ${durationLabel}` : ''}`;
 
           return (
@@ -72,7 +112,7 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
           );
         });
 
-        const currentDuration = formatElapsedDuration(progress.elapsedMs);
+        const currentDuration = formatElapsedDurationLabel(progress.elapsedMs);
         const currentSubtitle = `${formatDateForDisplay(item.startedAt)} - Present${currentDuration ? ` - ${currentDuration}${currentDuration === 'Less than a second' ? '' : ' so far'}` : ''}`;
         return (
           <View style={[styles.summaryCard, styles.coldSummary]}>
@@ -110,7 +150,62 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
                 {progress.next ? progress.next.label : 'All milestones achieved'}
               </Text>
             </View>
-            {progress.achieved.length ? (
+            {hasLastTarget ? (
+              <View style={styles.streakProgressSection}>
+                {shouldShowLastProgressBar ? (
+                  <View style={[styles.streakProgressBar, styles.lastProgressBar]}>
+                    <View
+                      style={[
+                        styles.streakProgressFill,
+                        styles.lastProgressFill,
+                        { width: `${Math.round(Math.min(1, lastProgress) * 100)}%` },
+                      ]}
+                    />
+                  </View>
+                ) : null}
+                <Text style={styles.streakProgressLabel}>
+                  {hasGoneLonger
+                    ? `Beat last streak (${lastDurationLabel})`
+                    : `Beat last streak (${lastDurationLabel})${lastTimeLeftLabel ? ` | ${lastTimeLeftLabel} left` : ''}`}
+                </Text>
+                {hasGoneLonger ? (
+                  <View style={styles.streakAchievement}>
+                    <FontAwesome6 name="trophy" size={14} color="#facc15" />
+                    <Text style={styles.streakAchievementText}>Going longer than last time</Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
+            {shouldShowRecordProgress ? (
+              <View style={styles.streakProgressSection}>
+                {shouldShowRecordProgressBar ? (
+                  <View style={[styles.streakProgressBar, styles.recordProgressBar]}>
+                    <View
+                      style={[
+                        styles.streakProgressFill,
+                        styles.recordProgressFill,
+                        { width: `${Math.round(Math.min(1, recordProgress) * 100)}%` },
+                      ]}
+                    />
+                  </View>
+                ) : null}
+                <Text style={[styles.streakProgressLabel, styles.recordProgressLabel]}>
+                  {hasHitRecord
+                    ? `Record streak (${recordDurationLabel})`
+                    : `Record streak (${recordDurationLabel})${recordTimeLeftLabel ? ` | ${recordTimeLeftLabel} left` : ''}`}
+                </Text>
+                {hasHitRecord ? (
+                  <View style={styles.streakAchievement}>
+                    <FontAwesome6 name="medal" size={14} color="#fde047" />
+                    <Text style={styles.streakAchievementText}>Record time</Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
+
+            {hasMilestones ? (
               <View style={styles.milestonesSection}>
                 <View style={styles.milestonesTitleRow}>
                   <Text style={styles.milestonesTitle}>Milestones achieved</Text>
@@ -121,8 +216,9 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.milestonesList}
                 >
-                  {progress.achieved.map((milestone, idx) => {
-                    const isLatest = idx === progress.achieved.length - 1;
+                  {milestoneChips.map((milestone, idx) => {
+                    const isLatest = idx === milestoneChips.length - 1;
+                    const iconName = milestone.label === 'Record time' ? 'medal' : 'trophy';
                     const c = milestone.color ?? { border: '#60a5fa', bg: 'rgba(96, 165, 250, 0.16)', iconBg: 'rgba(96, 165, 250, 0.22)', text: '#dbeafe' };
                     return (
                       <View
@@ -135,7 +231,7 @@ export function ColdTurkeyDetail(props: ColdTurkeyDetailProps) {
                         accessibilityLabel={`Achieved milestone: ${milestone.label}`}
                       >
                         <View style={[styles.milestoneIconWrap, { backgroundColor: c.iconBg, borderColor: c.border }]}>
-                          <FontAwesome6 name="trophy" size={12} color={c.border} />
+                          <FontAwesome6 name={iconName} size={12} color={c.border} />
                         </View>
                         <Text style={[styles.milestoneChipText, { color: c.text }]}>{milestone.label}</Text>
                       </View>
@@ -313,6 +409,50 @@ const styles = StyleSheet.create({
   stepperLabelRight: {
     textAlign: 'right',
   },
+    streakProgressSection: {
+      marginTop: 16,
+      gap: 8,
+    },
+    streakProgressBar: {
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: 'rgba(52, 211, 153, 0.16)',
+      overflow: 'hidden',
+    },
+    streakProgressFill: {
+      height: '100%',
+      backgroundColor: '#34d399',
+    },
+    lastProgressBar: {
+      backgroundColor: 'rgba(96, 165, 250, 0.18)',
+    },
+    lastProgressFill: {
+      backgroundColor: '#60a5fa',
+    },
+    recordProgressBar: {
+      backgroundColor: 'rgba(59, 130, 246, 0.18)',
+    },
+    recordProgressFill: {
+      backgroundColor: '#38bdf8',
+    },
+    streakProgressLabel: {
+      color: '#bfdbfe',
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    recordProgressLabel: {
+      color: '#a5f3fc',
+    },
+    streakAchievement: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    streakAchievementText: {
+      color: '#fef3c7',
+      fontWeight: '600',
+      fontSize: 13,
+    },
   milestonesSection: {
     marginTop: 18,
     gap: 10,
@@ -422,3 +562,4 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+

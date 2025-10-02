@@ -3,7 +3,7 @@ import {
   type ColdTurkeyMilestone,
 } from '@/constants/coldTurkeyMilestones';
 import { TrackerType } from '@/enums/TrackerType';
-import type { DoseDecreaseTrackedItem, DosageUnit } from '@/types/tracking';
+import type { ColdTurkeyResetEntry, DoseDecreaseTrackedItem, DosageUnit } from '@/types/tracking';
 
 type TimeUnit = {
   label: string;
@@ -62,6 +62,47 @@ export const getTodaysDoseTotal = (
   return { value, unit: displayUnit };
 };
 
+export type ColdTurkeyStreakTarget = ColdTurkeyResetEntry & {
+  durationMs: number;
+};
+
+export type ColdTurkeyStreakTargets = {
+  last?: ColdTurkeyStreakTarget;
+  record?: ColdTurkeyStreakTarget;
+};
+
+export const getColdTurkeyStreakTargets = (resetHistory?: ColdTurkeyResetEntry[]): ColdTurkeyStreakTargets => {
+  if (!resetHistory || resetHistory.length === 0) {
+    return {};
+  }
+
+  const entries = resetHistory
+    .map((entry) => {
+      const started = new Date(entry.startedAt).getTime();
+      const reset = new Date(entry.resetAt).getTime();
+      if (!Number.isFinite(started) || !Number.isFinite(reset) || reset <= started) {
+        return null;
+      }
+      return { ...entry, durationMs: reset - started };
+    })
+    .filter((entry): entry is ColdTurkeyStreakTarget => entry !== null)
+    .sort((a, b) => new Date(a.resetAt).getTime() - new Date(b.resetAt).getTime());
+
+  if (entries.length === 0) {
+    return {};
+  }
+
+  const last = entries[entries.length - 1];
+  let record = entries[0];
+  for (const entry of entries) {
+    if (entry.durationMs > record.durationMs) {
+      record = entry;
+    }
+  }
+
+  return { last, record };
+};
+
 export type ColdTurkeyProgress = {
   achieved: ColdTurkeyMilestone[];
   elapsedMs: number;
@@ -88,6 +129,19 @@ export const getColdTurkeyProgress = (startedAt: string): ColdTurkeyProgress => 
     progressToNext,
     previousDurationMs,
   };
+};
+
+export const formatElapsedDurationLabel = (elapsedMs: number, parts: number = 2): string => {
+  if (!Number.isFinite(elapsedMs) || elapsedMs <= 0) {
+    return 'Less than a second';
+  }
+
+  const breakdown = getElapsedBreakdown(elapsedMs, parts);
+  if (!breakdown.length) {
+    return 'Less than a second';
+  }
+
+  return breakdown.map((entry) => `${entry.value} ${entry.unit}`).join(' ');
 };
 
 export type ElapsedBreakdownEntry = {
